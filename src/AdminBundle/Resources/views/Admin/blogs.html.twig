@@ -1,0 +1,194 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/component.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/modal_component.css') }}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+{% endblock %}
+
+{% block header %}
+    <h1>
+        Career advice
+        <small>List of all articles</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="{{ path('dashboard') }}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active"><i class="fa fa-list"></i> Career advice</li>
+    </ol>
+{% endblock %}
+
+{% block content %}
+{% set queryParams = app.request.query.all %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-body">
+                    <div class="col-xs-2">
+                        <a href="{{ path('add_blog') }}" class="btn btn-success"><i class="fa fa-plus"></i></a>
+                    </div>
+                    <div class="col-xs-4">
+                        <form method="post" action="{{path('view_list_blog')}}">
+                            <div class="input-group input-group-sm">
+                                <input class="form-control" type="text" name="query"/>
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-info btn-flat">Search</button>
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-xs-offset-4 col-xs-2 text-right">
+                        <form method="post">
+                            <div class="input-group input-group-sm">
+                                <select class="form-control" name="filter">
+                                    <option value="">All</option>
+                                    <option {% if filter == 'career-advice' %} selected {% endif %} value="career-advice">Career Advice</option>
+                                    <option {% if filter == 'linkedin' %} selected {% endif %} value="linkedin">LinkedIn</option>
+                                    <option {% if filter == 'interviewing' %} selected {% endif %} value="interviewing">Interviewing</option>
+                                    <option {% if filter == 'job-search' %} selected {% endif %} value="job-search">Job Search</option>
+                                    <option {% if filter == 'resume' %} selected {% endif %} value="resume">Resume</option>
+                                    <option {% if filter == 'top-cateegory' %} selected {% endif %} value="top-category">Top category</option>
+                                </select>
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-info btn-flat">Apply</button>
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="sitemap_btn_div">
+                        <button id="generate_sitemap" class="btn btn-info btn-flat sitemap_btn_div" data-toggle="modal" data-target="#myModal">Generate Sitemap</button>
+                        <button id="generate_rss" class="btn btn-info btn-flat sitemap_btn_div">Generate RSS</button>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-body">
+                    {% if pages > 1 %}
+                        {% include '@Admin/Admin/pagination.html.twig' with {'route': 'view_list_blog', 'filter': filter} %}
+                    {% endif %}
+                    <table class="table table-bordered table-striped dataTable">
+                        <thead>
+                            <tr>
+                                {% if queryParams.sort_order is defined and queryParams.sort_order == 'desc' %}
+                                  <th class="sort sorting_desc" data-sort-field="title" data-next-sort-order="asc">
+                                    Title
+                                  </th>
+                                {% else %}
+                                   <th class="sort sorting_asc" data-sort-field="title" data-next-sort-order="desc">Title</th>
+                                {% endif %}
+                                <th>
+                                  Description
+                                </th>
+                                <th>Category</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                {% if (is_granted('ROLE_ADMIN_MANAGER')) %}
+                                <th>Action</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for blog in blogs %}
+                            {% for category in blog.category %}
+                                {% set categories = category.title %}
+                            {% endfor %}
+
+                            <tr>
+                                <td><a href="{{ path('edit_blog', {'blog': blog.id}) }}">{{ blog.title }}</a></td>
+                                <td>{{ blog.description }}</td>
+                                <td>
+                                    {% set num_blogs = blog.category | length %}
+
+                                    {% if num_blogs != 0 %}
+                                        {% if num_blogs > 1 %}
+                                            {% set categories = [] %}
+
+                                            {% for category in blog.category %}
+                                                {% set categories = categories|merge([category.title]) %}
+                                            {% endfor %}
+
+                                            {{ categories | join(', ') }}
+                                        {% else %}
+                                            {{ blog.category.first.title }}
+                                        {% endif %}
+                                    {% else %}
+                                        No services
+                                    {% endif %}
+                                </td>
+                                <td>{{ blog.postdate |date('Y-m-d') }}</td>
+                                <td>{{ blog.status }}</td>
+                                {% if (is_granted('ROLE_ADMIN_MANAGER')) %}
+                                  <td class="text-center">
+                                    <a class="btn btn-danger btn-sm" href="{{ path('delete_blog', {'blog': blog.id, 'page': current, 'filter': filter}) }}"><i class="fa fa-trash"></i></a>
+                                  </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if pages > 1 %}
+                        {% include '@Admin/Admin/pagination.html.twig' with {'route': 'view_list_blog', 'filter': filter} %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Sitemap is generated successfully</h4>
+      </div>
+      <div class="modal-body">
+        <p id="sitemap_result_data"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script>
+   {% set currentPath = path(app.request.attributes.get('_route'),
+                       app.request.attributes.get('_route_params')) %}
+   $(document).ready(function() {
+    $("#generate_sitemap").click(function(){
+        $.ajax({
+                //url:  "https://findmyprofession.com/generate-sitemap",
+                url:  "http://demo.findmyprofession.com:8443/generate-sitemap",
+                type: "POST",
+                success:function(data) {
+                    $("#sitemap_result_data").html( data );
+                }
+            });
+    });
+
+    $("#generate_rss").click(function(){
+        $.ajax({
+            url:  "{{ path('admin_rss_generate') }}",
+            type: "POST",
+            success:function(data) {
+                getSuccessNoty('RSS file generated successfully');
+            }
+        });
+    });
+
+     var path = "{{currentPath}}";
+     $(document).on('click', '.sort', function() {
+       path = path + '?sort_field=' + $(this).data('sort-field') + '&sort_order=' + $(this).data('next-sort-order');
+       window.location.href = path
+     })
+   })
+   
+  </script>
+{% endblock %}

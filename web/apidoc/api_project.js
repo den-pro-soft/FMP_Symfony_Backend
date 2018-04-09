@@ -1,0 +1,18 @@
+define({
+  "name": "Find My Profession",
+  "version": "1.0.0",
+  "description": "The API documentation of Find My Profession",
+  "title": "Find My Profession API Documentation",
+  "template": {
+    "withCompare": true,
+    "withGenerator": true
+  },
+  "sampleUrl": false,
+  "apidoc": "0.2.0",
+  "generator": {
+    "name": "apidoc",
+    "time": "2017-07-07T08:14:43.100Z",
+    "url": "http://apidocjs.com",
+    "version": "0.16.1"
+  }
+});

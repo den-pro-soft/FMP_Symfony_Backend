@@ -1,0 +1,50 @@
+RestBundle\Entity\User:
+    exclusion_policy: ALL
+    properties:
+        id:
+            expose: true
+            groups: ['list', 'details']
+
+        email:
+            expose: true
+            groups: ['list', 'details']
+
+        full_name:
+            expose: true
+            groups: ['list', 'details']
+
+        token:
+            expose: true
+            groups: ['list', 'details']
+
+        avatar:
+            expose: true
+            groups: ['list', 'details']
+
+        link:
+            expose: true
+            groups: ['list', 'details']
+
+        packages:
+            expose: true
+            groups: ['list', 'details']
+
+        url:
+            expose: true
+            groups: ['list', 'details', 'random_blog', 'top']
+
+        author:
+            expose: true
+            groups: ['list', 'details', 'random_blog']
+
+        tops:
+            expose: true
+            groups: ['details']
+
+        random_blogs:
+            expose: true
+            groups: ['details']
+
+        liked:
+            expose: true
+            groups: ['list', 'details']

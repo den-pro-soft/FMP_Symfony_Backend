@@ -1,0 +1,208 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+{# <link rel="stylesheet" href="{{ asset('bundles/admin/css/jquery-ui.css') }}"> #}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<style>
+    .sortable { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+    .sortable li { margin: 0 3px 3px 3px; padding: 20px; height: 100%; width: 100%; background: #FFF; }
+    .sortable li span { position: absolute; margin-left: -1.3em; }
+    .pull-right{ margin-right: -15px; margin-top: -20px; }
+    .pull-right i{ font-size: 18px; }
+    .item-img-element{
+        max-width: 100px; 
+        max-height: 120px; 
+        height: 100%; 
+        width: 100%; 
+        overflow: hidden; 
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+
+{% block sub_title %}Resources{% endblock %}
+{% block sub_small_title %}List of all resources{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-file"></i> Resources</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <h3>Cover Letters</h3>
+            <div class="box box-primary">
+                <div class="box-body">
+
+                    <ul id="sortable-cover" class="sortable">
+                        {% set count = 6 - resources | length %}
+                        {% for res in resources %}
+                            {% if res.type == "cover_letters" %}
+                            <div class="col-lg-2 col-md-4 col-sm-6 text-center cover_resources" name="cover_resources[]" indexid="{{ res.id }}">
+                                <li class="ui-state-default">
+                                    <div class="pull-right">
+                                        <a class="btn btn-box-tool" href="{{ path('resource_remove', {'resource': res.id}) }}">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </div>
+                                    <div class="item-img-element">
+                                        <a href="{{ path('resource_link', {'resource': res.id}) }}">
+                                            <img src="{{ vich_uploader_asset(res, 'preview') }}" alt="{{ res.name }}" style="height: 95px;" />
+                                            <p>{{ res.name }}</p>
+                                        </a>
+                                    </div>
+                                </li>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                
+                </div>
+            </div>
+            <h3>Follow-Up Emails</h3>
+            <div class="box box-primary">
+                <div class="box-body">
+                    <ul id="sortable-email" class="sortable">
+                        {% set count = 6 - resources | length %}
+                        {% for res in resources %}
+                            {% if res.type == "follow_up_emails" %}
+                            <div class="col-lg-2 col-md-4 col-sm-6 text-center follow_email_resources" name="follow_email_resources[]" indexid="{{ res.id }}">
+                                <li class="ui-state-default">
+                                    <div class="pull-right">
+                                        <a class="btn btn-box-tool" href="{{ path('resource_remove', {'resource': res.id}) }}">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </div>
+                                    <div class="item-img-element">
+                                        <a href="{{ path('resource_link', {'resource': res.id}) }}">
+                                            <img src="{{ vich_uploader_asset(res, 'preview') }}" alt="{{ res.name }}" style="height: 95px;" />
+                                            <p>{{ res.name }}</p>
+                                        </a>
+                                    </div>
+                                </li>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                
+                </div>
+            </div>
+            <h3>Thank You Emails</h3>
+            <div class="box box-primary">
+                <div class="box-body">
+                    <ul id="sortable" class="sortable">
+                        {% set count = 6 - resources | length %}
+                        {% for res in resources %}
+                            {% if res.type == "thank_you_emails" %}
+                            <div class="col-lg-2 col-md-4 col-sm-6 text-center thanks_email_resources" name="thanks_email_resources[]" indexid="{{ res.id }}">
+                                <li class="ui-state-default">
+                                    <div class="pull-right">
+                                        <a class="btn btn-box-tool" href="{{ path('resource_remove', {'resource': res.id}) }}">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </div>
+                                    <div class="item-img-element">
+                                        <a href="{{ path('resource_link', {'resource': res.id}) }}">
+                                            <img src="{{ vich_uploader_asset(res, 'preview') }}" alt="{{ res.name }}" style="height: 95px;" />
+                                            <p>{{ res.name }}</p>
+                                        </a>
+                                    </div>
+                                </li>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            {# {% if count != 0 %} #}
+            <div class="box box-primary">
+                    {{ form_start(form) }}
+                    <div class="box-body">
+                        {% if form_errors(form) %}
+                            <div class="alert alert-danger">{{ form_errors(form.resource) }}</div>
+                        {% endif %}
+                        <div class="form-group">
+                            <div class="col-sm-4">{{ form_row(form.resource) }}</div>
+                            <div class="col-sm-4">{{ form_row(form.preview) }}</div>
+                            <div class="col-sm-4 resources_type_select">{{ form_row(form.type) }}</div>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        {{ form_widget(form.submit) }}
+                    </div>
+                    {{ form_end(form) }}
+            </div>
+            {# {% endif %} #}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {# <script src="{{ asset('bundles/admin/js/jquery-ui.js') }}"></script>
+    <script src="{{ asset('bundles/admin/js/jquery-1.12.4.js') }}"></script> #}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $( function() {
+            $( "#sortable" ).sortable();
+            $( "#sortable" ).disableSelection();
+            $( "#sortable-cover" ).sortable();
+            $( "#sortable-cover" ).disableSelection();
+            $( "#sortable-email" ).sortable();
+            $( "#sortable-email" ).disableSelection();
+        
+        } );
+
+        $( ".thanks_email_resources" ).mouseup(function() {
+            var thanks_array_result = [];
+            $("div[name='thanks_email_resources[]']").each(function( index ) {
+                thanks_array_result.push( $( this ).attr('indexid') );
+            });
+            $.ajax({
+                url:  "{{ path('resource_sort_update') }}",
+                type: "POST",
+                data: { resources : thanks_array_result },
+                success:function(data) {
+                    getSuccessNoty('Resources sort changed');
+                }
+            });
+            
+        });
+
+        $( ".follow_email_resources" ).mouseup(function() {
+            var follow_array_result = [];
+            $("div[name='follow_email_resources[]']").each(function( index ) {
+                follow_array_result.push( $( this ).attr('indexid') );
+            });
+        
+            $.ajax({
+                url:  "{{ path('resource_sort_update') }}",
+                type: "POST",
+                data: { resources : follow_array_result },
+                success:function(data) {
+                    getSuccessNoty('Resources sort changed');
+                }
+            });
+            
+        });
+
+        $( ".cover_resources" ).mouseup(function() {
+            var cover_array_result = [];
+            $("div[name='cover_resources[]']").each(function( index ) {
+                cover_array_result.push( $( this ).attr('indexid') );
+            });
+        
+            $.ajax({
+                url:  "{{ path('resource_sort_update') }}",
+                type: "POST",
+                data: { resources : cover_array_result },
+                success:function(data) {
+                    getSuccessNoty('Resources sort changed');
+                }
+            });
+            
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}{% endblock %}
+{% block sub_small_title %}{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-cog"></i> Settings</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="col-md-4 col-md-offset-4">
+                <h3 align="center">Change Your Password</h3>
+                {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
+                {% for flash_message in app.session.flashBag.get('success') %}
+                    <div class="alert alert-success form-group">
+                        {{ flash_message }}
+                    </div>
+                {% endfor %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <div class="text-center">
+                            {{ form_widget(field) }}
+                        </div>
+                    </div>
+                {% endfor %}
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

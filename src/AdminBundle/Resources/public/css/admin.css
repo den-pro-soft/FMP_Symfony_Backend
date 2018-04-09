@@ -1,0 +1,64 @@
+.version{
+    color: white;
+    margin-left: 70px;
+    position: absolute;
+    bottom: 10px;
+}
+
+.date-picker{
+    float: right;
+    width: 180px;
+    position: relative;
+    top: -44px;
+    right: 10px;
+}
+
+.report-date-picker{
+    float: left;
+    width: 180px;
+    position: relative;
+}
+
+#date-picker{
+    width: 110px;
+}
+
+.picker{
+    float: left;
+}
+
+.picker-submit{
+    float: right;
+}
+
+.time-management{
+    margin-left: 20px;
+    height: 40px;
+}
+
+.delete-all{
+    float: right;
+    width: 100px;
+    position: relative;
+    top: -44px;
+    right: 10px;
+}
+
+#myModal > div > div > form > div.modal-body > div > div:nth-child(3) > div > div,
+#myModal > div > div > form > div.modal-body > div > div:nth-child(5) > div.col-sm-1 > div {
+    margin-top: 5px;
+}
+
+#myModal > div > div > form > div.modal-body > div > div:nth-child(5) > label:nth-child(4) {
+    text-align: left;
+}
+
+.feedback-body {
+    overflow: hidden;
+}
+
+.users-body {
+    overflow: hidden;
+    white-space: nowrap;
+    margin-right: 10px;
+}

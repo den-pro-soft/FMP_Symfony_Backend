@@ -1,0 +1,6 @@
+RewriteEngine  on
+RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit/[0-9]|Twitterbot|Skype|Pinterest|Google.*snippet|Google)
+RewriteRule ^(.*)$ crawl.php?q=$1 [L,QSA]
+
+RewriteRule ^ http://127.0.0.1:8080%{REQUEST_URI} [P]
+#ProxyPassReverse / http://127.0.0.1:8080/

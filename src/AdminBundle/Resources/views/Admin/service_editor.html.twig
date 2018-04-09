@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Services{% endblock %}
+{% block sub_small_title %}Edit service{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-money"></i> Service</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                {{ form_start(form) }}
+                <div class="box-body">
+                    <div class="form-group">
+                        <div class="col-sm-6">{{ form_row(form.name) }}</div>
+                        <div class="col-sm-6">{{ form_row(form.description) }}</div>
+                        {% if not premium %}
+                        <div class="col-sm-6">{{ form_row(form.priceSenior) }}</div>
+                        <div class="col-sm-6">{{ form_row(form.priceExecutive) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="box-footer">
+                    {{ form_widget(form.submit) }}
+                </div>
+                {{ form_end(form) }}
+                {% if premium %}
+                    <div class="box-body">
+                        <div class="form-group">
+                            <div class="col-sm-6">Price: <input id='price_value' class='form-control col-md-6'></div>
+                            <div class="col-sm-6">URL: <input id='url_value' class='form-control col-md-6'></div>
+                        </div>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    $("#price_value").change(function(){
+        var v = $("#price_value").val() * 62343;
+        $("#url_value").val( "https://findmyprofession.com/custom-checkout/"+v );
+    });
+  </script>
+{% endblock %}

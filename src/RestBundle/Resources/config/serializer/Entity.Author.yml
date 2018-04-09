@@ -1,0 +1,23 @@
+RestBundle\Entity\Author:
+    exclusion_policy: ALL
+    properties:
+        name:
+            expose: true
+            groups: ['list', 'details', 'random_blog']
+
+        author_description:
+            expose: true
+            serialized_name: description
+            groups: ['list', 'details']
+
+        avatar:
+            expose: true
+            groups: ['list', 'details', 'random_blog']
+
+        link:
+            expose: true
+            groups: ['list', 'details']
+
+        avatar_alt:
+            expose: true
+            groups: ['list', 'details', 'random_blog']

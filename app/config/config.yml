@@ -1,0 +1,201 @@
+imports:
+    - { resource: parameters.yml }
+    - { resource: security.yml }
+    - { resource: services.yml }
+    - { resource: "@AdminBundle/Resources/config/services.yml" }
+    - { resource: "@RestBundle/Resources/config/services.yml" }
+# Put parameters here that don't need to change on each machine where the app is deployed
+# http://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+    locale: en
+
+framework:
+    #esi: ~
+    #translator: { fallbacks: ['%locale%'] }
+    secret: '%secret%'
+    router:
+        resource: '%kernel.root_dir%/config/routing.yml'
+        strict_requirements: ~
+    form: ~
+    csrf_protection: ~
+    validation: { enable_annotations: true }
+    #serializer: { enable_annotations: true }
+    templating:
+        engines: ['twig']
+    default_locale: '%locale%'
+    trusted_hosts: ~
+    trusted_proxies: ~
+    session:
+        # handler_id set to null will use default session handler from php.ini
+        handler_id: ~
+    fragments: ~
+    http_method_override: true
+
+# Twig Configuration
+twig:
+    debug: '%kernel.debug%'
+    strict_variables: '%kernel.debug%'
+    globals:
+        web_app_url: '%web_app_url%'
+
+# Doctrine Configuration
+doctrine:
+    dbal:
+        driver: pdo_mysql
+        host: '%database_host%'
+        port: '%database_port%'
+        dbname: '%database_name%'
+        user: '%database_user%'
+        password: '%database_password%'
+        charset: UTF8
+        # if using pdo_sqlite as your database driver:
+        #   1. add the path in parameters.yml
+        #     e.g. database_path: '%kernel.root_dir%/data/data.db3'
+        #   2. Uncomment database_path in parameters.yml.dist
+        #   3. Uncomment next line:
+        #path: '%database_path%'
+
+    orm:
+        auto_generate_proxy_classes: '%kernel.debug%'
+        naming_strategy: doctrine.orm.naming_strategy.underscore
+        auto_mapping: true
+        metadata_cache_driver: array
+        query_cache_driver: array
+        result_cache_driver: array
+        dql:
+            numeric_functions:
+                Rand: RestBundle\Query\RandFunction
+
+# Swiftmailer Configuration
+swiftmailer:
+    transport: '%mailer_transport%'
+    host:      '%mailer_host%'
+    username:  '%mailer_user%'
+    password:  '%mailer_password%'
+#   spool: { type: memory }
+    port:       587
+    encryption: tls
+    auth_mode:  login
+    stream-options:
+        ssl:
+            allow_self_signed : true
+            verify_peer: false
+#           verify_peer_name: false
+
+
+jms_serializer:
+    metadata:
+        auto_detection: true
+
+ivory_ck_editor:
+    default_config: default
+    configs:
+        default:
+            filebrowserImageUploadRoute: "upload_blog_image"
+            fontSize_sizes: "8/8px;9/9px;10/10px;11/11px;12/12px;13/13px;14/14px;15/15px;16/16px;17/17px;18/18px;19/19px;20/20px;21/21px;22/22px;23/23px;24/24px;25/25px;26/26px;27/27px;28/28px;29/29px;30/30px;31/31px;32/32px;33/33px;34/34px;35/35px;36/36px;37/37px;38/38px;39/39px;40/40px;41/41px;42/42px;43/43px;44/44px;45/45px;46/46px;47/47px;48/48px;49/49px;50/50px;51/51px;52/52px;53/53px;54/54px;55/55px;56/56px;57/57px;58/58px;59/59px;60/60px;61/61px;62/62px;63/63px;64/64px;65/65px;66/66px;67/67px;68/68px;69/69px;70/70px;71/71px;72/72px"
+
+# quartet_stripe:
+#     api_secret: sk_live_P5ypN4tsqElBd2Hk2YLjmNDn
+#     api_public: pk_live_8FiuGEIo61Tn9YzJb1XTxDKt
+
+vich_uploader:
+    db_driver: orm
+    twig:      true
+    storage:   file_system
+    mappings:
+        image:
+            uri_prefix:         /uploads
+            upload_destination: "%uploads%"
+            delete_on_update:   true
+            delete_on_remove:   true
+            namer:              vich_uploader.namer_uniqid
+
+        document:
+            uri_prefix:         /uploads/documents
+            upload_destination: "%files%"
+            delete_on_update:   true
+            delete_on_remove:   true
+            namer:              vich_uploader.namer_uniqid
+        avatar:
+            uri_prefix:         /uploads/avatars
+            upload_destination: "%avatars%"
+            delete_on_update:   true
+            delete_on_remove:   true
+            namer:              vich_uploader.namer_uniqid
+
+        template:
+            uri_prefix:         /uploads/templates
+            upload_destination: "%templates%"
+            delete_on_update:   true
+            delete_on_remove:   true
+            namer:              vich_uploader.namer_uniqid
+
+        resource:
+            uri_prefix:         /uploads/resources
+            upload_destination: "%resources%"
+            delete_on_update:   true
+            delete_on_remove:   true
+            namer:              vich_uploader.namer_uniqid
+
+        template_preview:
+            uri_prefix:         /uploads/templates/preview
+            upload_destination: "%template_preview%"
+            delete_on_update:   true
+            delete_on_remove:   true
+            namer:              vich_uploader.namer_uniqid
+
+        resource_preview:
+            uri_prefix:         /uploads/resources/preview
+            upload_destination: "%resource_preview%"
+            delete_on_update:   true
+            delete_on_remove:   true
+            namer:              vich_uploader.namer_uniqid
+
+fos_rest:
+    serializer:
+        serialize_null: true
+    view:
+        view_response_listener: true
+        force_redirects:
+            html: false
+        formats:
+            json: true
+            xml: true
+        templating_formats:
+            html: false
+    format_listener:
+        rules:
+            - { path: ^/api/v1, priorities: [ json ], fallback_format: json, prefer_extension: false }
+            - { path: ^/, priorities: [ html, json, xml ], fallback_format: html, prefer_extension: false }
+    param_fetcher_listener: force
+    allowed_methods_listener: true
+    body_listener: true
+    body_converter:
+        enabled: true
+        validate: true
+    routing_loader:
+        default_format: json
+    disable_csrf_role: ROLE_USER
+
+nelmio_cors:
+    defaults:
+        allow_credentials: false
+        allow_origin: []
+        allow_headers: []
+        allow_methods: []
+        expose_headers: []
+        max_age: 0
+        hosts: []
+        origin_regex: false
+    paths:
+        '^/api/':
+            allow_origin: ['*']
+            allow_headers: ['*']
+            allow_methods: ['OPTIONS', 'POST', 'PUT', 'GET', 'DELETE']
+            max_age: 3600
+        '^/':
+            allow_origin: ['*']
+            allow_headers: ['*']
+            allow_methods: ['OPTIONS', 'POST', 'PUT', 'GET', 'DELETE']
+            max_age: 3600
+            hosts: ['^api\.']

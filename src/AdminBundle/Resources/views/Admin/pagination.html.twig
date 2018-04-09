@@ -1,0 +1,70 @@
+{% if filter is not defined %}
+{% set filter = null %}
+{% endif %}
+<div class="text-center">
+<ul class="pagination pagination-sm">
+    {% set queryParams = app.request.query.all %}
+    {% set queryParams = queryParams|merge(app.request.request.all) %}
+    {% set sortField = 'post_date' %}
+    {% set sortOrder = 'desc' %}
+
+    {% if queryParams.sort_field is defined %}
+      {% set sortField = queryParams.sort_field %}
+    {% endif %}
+
+    {% if queryParams.sort_order is defined %}
+      {% set sortOrder = queryParams.sort_order %}
+    {% endif %}
+
+    <li {{ current == 1 ? 'class="disabled"' }}>
+      {% if queryParams.query is defined %}
+        <a href="{{ path(route, {page: current - 1 < 1 ? 1 : current -1, filter: filter, query: queryParams.query, sort_field: sortField, sort_order: sortOrder}) }}">«</a>
+      {% else %}
+        <a href="{{ path(route, {page: current - 1 < 1 ? 1 : current -1, filter: filter, sort_field: sortField, sort_order: sortOrder}) }}">«</a>
+      {% endif %}
+    </li>
+
+    <li {{ current == 1 ? 'class="active"' }}>
+          {% if queryParams.query is defined %}
+            <a {{ current == 1 ? 'style="display: none;"' }} href="{{ path(route, {page: 1, filter: filter, query: queryParams.query, sort_field: sortField, sort_order: sortOrder}) }}">{{ 1 }}</a>
+          {% else %}
+            <a {{ current == 1 ? 'style="display: none;"' }} href="{{ path(route, {page: 1, filter: filter, sort_field: sortField, sort_order: sortOrder}) }}">{{ 1 }}</a>
+          {% endif %}
+    </li>
+
+    <li>
+      <a {{ current == 1 ? 'style="display: none;"' }}>...</a>
+    </li>
+
+    {# {% for i in 1..pages %} #}
+    {% for i in [current,current + 1, current + 2 , current + 3] %}
+        <li {{ current == i ? 'class="active"' }}>
+          {% if queryParams.query is defined %}
+            <a {{ i > pages ? 'style="display: none;"' }} href="{{ path(route, {page: i, filter: filter, query: queryParams.query, sort_field: sortField, sort_order: sortOrder}) }}">{{ i }}</a>
+          {% else %}
+            <a {{ i > pages ? 'style="display: none;"' }} href="{{ path(route, {page: i, filter: filter, sort_field: sortField, sort_order: sortOrder}) }}">{{ i }}</a>
+          {% endif %}
+        </li>
+    {% endfor %}
+
+    <li>
+      <a {{ current == pages ? 'style="display: none;"' }}>...</a>
+    </li>
+
+    <li {{ current == pages ? 'class="active"' }}>
+          {% if queryParams.query is defined %}
+            <a {{ current == pages ? 'style="display: none;"' }} href="{{ path(route, {page: pages, filter: filter, query: queryParams.query, sort_field: sortField, sort_order: sortOrder}) }}">{{ pages }}</a>
+          {% else %}
+            <a {{ current == pages ? 'style="display: none;"' }} href="{{ path(route, {page: pages, filter: filter, sort_field: sortField, sort_order: sortOrder}) }}">{{ pages }}</a>
+          {% endif %}
+    </li>
+
+    <li {{ current == pages ? 'class="disabled"' }}>
+          {% if queryParams.query is defined %}
+            <a href="{{ path(route, {page: current + 1 <= pages ? current + 1 : current, filter: filter, query: queryParams.query, sort_field: sortField, sort_order: sortOrder}) }}">»</a>
+          {% else %}
+            <a href="{{ path(route, {page: current + 1 <= pages ? current + 1 : current, filter: filter, sort_field: sortField, sort_order: sortOrder}) }}">»</a>
+          {% endif %}
+    </li>
+</ul>
+</div>

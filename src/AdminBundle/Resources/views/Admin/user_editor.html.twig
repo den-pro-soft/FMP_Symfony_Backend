@@ -1,0 +1,970 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('bundles/admin/css/chat.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/normalize.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/component.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.8.1/css/perfect-scrollbar.min.css" />
+
+    <style>
+        .inputfile {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+        .container.collapse {
+            width: auto;
+         }
+     #profile_profile_career_preferences_relocation_type input[type='radio'] {
+         margin-right: 5px;
+     }
+     #profile_profile_career_preferences_relocation_type label {
+         margin-right: 5px;
+     }
+     .custom-menu {
+        display: none;
+        z-index: 1000;
+        position: absolute;
+        overflow: hidden;
+        border: 1px solid #CCC;
+        white-space: nowrap;
+        font-family: sans-serif;
+        background: #FFF;
+        color: #333;
+        border-radius: 5px;
+        padding: 0;
+    }
+
+    .custom-menu li {
+        padding: 8px 12px;
+        cursor: pointer;
+        list-style-type: none;
+        transition: all .3s ease;
+        user-select: none;
+    }
+
+    .custom-menu li:hover {
+        background-color: #DEF;
+    }
+    .message-date{
+        font-size: 12px;
+    }
+    .media_element_set{
+        margin: 0px;
+    }
+    .media_col_element{
+        padding-bottom: 15px;
+    }
+    #direct-chat-message{
+        overflow-y:auto;
+        max-height:150px;
+        line-height: 1.3;
+        height:55px;
+        min-height:55px;
+        padding-top: 15px;
+        font-size: 15px;
+    }
+    .input-group-btn {
+        vertical-align: bottom !important;
+    }
+    .message-edit-marker-svg{
+        width: 15px;
+        height: 15px;
+        fill: #aaa;
+        margin-top: 15px;
+        margin-right: 7px;
+        display:none;
+    }
+    .message-edit-mark-show{
+        display: inline-block;
+    }
+    </style>
+{% endblock %}
+
+{% block sub_title %}Profile{% endblock %}
+{% block sub_small_title %}{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-user"></i> User</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content"  style="margin-bottom: 100px;">
+        <div class="col-md-12">
+            <a class="btn btn-primary" href="{{ path('user_jobs', {'user': user.id}) }}">User Jobs</a>
+        </div>
+        <hr>
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-8">
+            {{ form_start(form) }}
+            <div class="form-group">
+                <div class="box-group" id="accordion">
+                    <div class="panel box box-primary">
+                        <div class="box-header with-border">
+                            <h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#profile">
+                            {{ form_label(form) }}
+                            </a></h4>
+                        </div>
+                        <div id="profile" class="panel-collapse collapse in">
+                            <div class="box-body">
+                                {{ form_row(form.full_name) }}
+                                {{ form_row(form.email) }}
+                                {{ form_row(form.profile.phone_number) }}
+                                {{ form_row(form.profile.street_address) }}
+                                {{ form_row(form.profile.city) }}
+                                {{ form_row(form.profile.state) }}
+                                {{ form_row(form.profile.postal_code) }}
+                                {{ form_row(form.profile.birthDate) }}
+                                {# {{ form_row(form.profile.linkedin_url) }} #}
+                                {{ form_row(form.profile.new_gmail_email) }}
+                                {{ form_row(form.profile.new_gmail_password) }}
+                                {{ form_row(form.profile.linkedin_email) }}
+                                {{ form_row(form.profile.linkedin_password) }}
+                            </div>
+                        </div>
+                        <div class="box-header with-border">
+                            <h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#job">
+                                    <label class="required">Career Preferences</label>
+                                </a></h4>
+                        </div>
+                        <div id="job" class="panel-collapse collapse">
+                            <div class="box-body">
+                                {{ form_row(form.profile.career_preferences) }}
+                            </div>
+                        </div>
+
+                        <div class="box-header with-border">
+                            <h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#educationAndWorkExperience">
+                                    <label class="required">Education & Work Experience</label>
+                                </a></h4>
+                        </div>
+                        <div id="educationAndWorkExperience" class="panel-collapse collapse">
+                            <div class="box-body">
+                                {% for education in form.profile.education %}
+                                    <div class="box-header with-border">
+                                        <div class="box-body">
+                                            {{ form_row(education, {'label': false}) }}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    {{ form_row(form.profile.education, {'label': false}) }}
+                                    No education
+                                {% endfor %}
+                                <hr>
+                                {% for work_experience in form.profile.work_experience %}
+                                <div class="box-header">
+                                    <div class="box-body">
+                                        {{ form_row(work_experience, {'label': false}) }}
+                                    </div>
+                                </div>
+                                {% else %}
+                                    {{ form_row(form.profile.work_experience, {'label': false}) }}
+                                    No work experience
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="box-header with-border">
+                            <h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#reference">
+                                    <label class="required">Reference</label>
+                                </a></h4>
+                        </div>
+                        <div id="reference" class="panel-collapse collapse">
+                            <div class="box-body">
+                                {% for user_reference in form.profile.user_reference %}
+                                    <div class="box-header">
+                                        <div class="box-body">
+                                            {{ form_row(user_reference, {'label': false}) }}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    {{ form_row(form.profile.user_reference, {'label': false}) }}
+                                    No reference
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="box-header with-border">
+                            <h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#questions">
+                                    <label class="required">EEOC Questions</label>
+                                </a></h4>
+                        </div>
+                        <div id="questions" class="container panel-collapse collapse">
+
+                                {% for fields in form.profile.questions %}
+                                    {{ form_label(fields) }}
+                            <div class="box-body">
+                                {% if fields[0] is defined %}
+                                    {% for field in fields %}
+                                    {{ form_widget(field) }}
+                                    {{ form_label(field) }}
+                                    <div class="clearfix"></div>
+                                    {% endfor %}
+                                {% else %}
+                                    {{ form_widget(fields) }}
+                                {% endif %}
+                            </div>
+                                {% endfor %}
+
+                        </div>
+                        {{ form_end(form) }}
+                        <div class="box-header with-border">
+                            <h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#documents">
+                                    <label class="required">Documents</label>
+                                </a></h4>
+                        </div>
+                        <div id="documents" class="panel-collapse collapse">
+                            <div class="box-body">
+                                {{ form_start(file_form, {'action': path('admin_user_documents_add', {'user': user.id })}) }}
+                                <div class="form-group">
+                                <div>{{ form_row(file_form.type) }}</div>
+                                    <div>{{ form_row(file_form.document) }}</div>
+                                </div>
+                                <div class="form-group">
+                                {{ form_row(file_form.submit, {'label': false}) }}
+                                </div>
+                                {{ form_end(file_form) }}
+                                <hr>
+                                {% if user.profile.documents[0] is defined %}
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Document Name</th>
+                                            <th>Document Type</th>
+                                            <th>Added By</th>
+                                            <th>Date Added</th>
+                                            <th>Remove</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for document in user.profile.documents %}
+                                        <tr>
+                                            <td><a href="{{ path('admin_user_documents_download', {'document': document.id}) }}">{{ document.name }}</td>
+                                            <td>{{ document.type }}</td>
+                                            <td>{{ document.addedBy }}</td>
+                                            <td>{{ document.dateAdded | date('n/d/y') }}</td>
+                                            <td class="text-center"><a href="{{ path('admin_user_documents_remove', {'document': document.id}) }}"><i class="fa fa-close"></i></a></td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    No documents
+                                {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="box-header with-border">
+                            <h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#orders">
+                                    <label class="required">Orders</label>
+                                </a></h4>
+                        </div>
+                        <div id="orders" class="panel-collapse collapse">
+                            <div class="box-body">
+                                {% if user.packages[0] is defined %}
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Plan</th>
+                                            <th>Price</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for package in user.packages %}
+                                        <tr>
+                                            <td>{{ package.service.name }}</td>
+                                            <td>{{ package.plan }}{% if package.service.link == 'career-finder' %}%{% endif %}</td>
+                                            <td>{{ package.price }}</td>
+                                            <td class="text-center">
+                                            {% if package.isApproved %}
+                                            <a href="#" class="btn btn-success approve" disabled="disabled">Completed</a>
+                                            <a href="#" class="btn btn-danger cancel"
+                                            data-toggle="modal"
+                                            data-target="#modal-cancel"
+                                            data-url="{{ path('admin_order_status', {'order': package.id, 'status': 'cancel'}) }}">Cancel</a>
+                                            {% else %}
+                                            <a href="#" class="btn btn-success approve"
+                                            data-toggle="modal"
+                                            data-target="#modal-approve"
+                                            data-url="{{ path('admin_order_status', {'order': package.id, 'status': 'completed'}) }}">Complete</a>
+                                            <a href="#" class="btn btn-danger cancel"
+                                            data-toggle="modal"
+                                            data-target="#modal-cancel"
+                                            data-url="{{ path('admin_order_status', {'order': package.id, 'status': 'cancel'}) }}">Cancel</a>
+                                            {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    No documents
+                                {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="box-header with-border">
+                            <h4 class="box-title"><a data-toggle="collapse" data-parent="#accordion" href="#schedule">
+                                    <label class="required">Schedule History</label>
+                                </a></h4>
+                        </div>
+                        <div id="schedule" class="panel-collapse collapse">
+                            <div class="box-body">
+                                {% if schedules !="" %}
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>Name</th>
+                                            <th>Location</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for schedule in schedules %}
+                                        <tr>
+                                            <td>{{ schedule.starttime|date('Y-m-d H:i:s', 'GMT+0') }}</td>
+                                            <td>{{ schedule.endtime|date('Y-m-d H:i:s', 'GMT+0') }}</td>
+                                            <td>{{ schedule.name }}</td>
+                                            <td>{{ schedule.location }}</td>
+                                            <td>{{ schedule.status }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    No Schedule
+                                {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <div class="col-md-4">
+                <div class="box box-primary direct-chat direct-chat-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Direct Chat</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="chat">
+                            <div class="chat-messages">
+                            {# {% for key, group in messages %} #}
+                              {# <div class="message-group" data-date="{{key}}"> #}
+                                
+                                {% set date_index_val = "" %}
+
+                                {% for message in messages %}
+                                    {% if date_index_val != message.date|date("Y-d-m") %}
+                                            
+                                            <div class="message-group-date">
+                                                {% if message.date == "now"|date("Y-d-m")%}
+                                                    Today
+                                                {% elseif message.date == "now"|date_modify("-1 day")|date("Y-d-m")  %}
+                                                    Yesterday
+                                                {% else %}
+                                                    {{ message.date|date("F jS")}}
+                                                {% endif %}
+                                            </div>
+                                            {% set date_index_val = message.date|date("Y-d-m") %}
+
+                                    {% endif %}
+
+                                  {% if message.author != user.id %}
+                                    {% set class = 'sms-sender' %}
+                                  {% else %}
+                                    {% set class = 'sms-recipient' %}
+                                  {% endif %}
+                                  <div class="row media media_element_set {{ class }}" id="message-{{ message.id }}" data-uid = "{{ message.id }}" >
+                                    <div class="col-sm-10 media_col_element chat-message-select-area">
+                                        
+                                    {% if message.author != user.id %}
+                                        <span class="message_event_select" id="span-{{ message.id }}-body">
+                                            <svg width="11" height="8">
+                                                <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#chat-more-option') }}"></use>
+                                            </svg>
+                                        </span>
+                                        <div id="contextspan-{{ message.id }}-body" class="contextMenu_set">
+                                            {% if message.attachmentName is null %}
+                                                <li data-action="update" onclick="update_message( {{ message.id }} )">Edit</li>
+                                            {% endif %}
+                                            <li data-action="remove" onclick="delete_message( {{ message.id }} )">Remove</li>
+                                        </div>
+                                    {% endif %}
+                                    
+                                        <div class="message-date" data-utc-date="{{message.date|date('Y-m-d H:i:s', 'GMT+0')}}">
+                                                    {{message.sendername}} | 
+                                        </div>
+                                        {% if ( message.author != user.id ) and ( message.edited == 1 ) %}
+                                            <svg id = "svg-{{ message.id }}" class="message-edit-marker-svg message-edit-mark-show"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/bundles/admin/css/sprite.svg#edit-pencil-icons"></use></svg>
+                                        {% endif %}
+                                        <div class="media-body" id="message-{{ message.id }}-body">{% if message.attachmentName is not null %}
+                                            <i class="fa fa-paperclip fa-lg"></i>
+                                            <a href="{{ path('admin_chat_attachment_download', {'message': message.id}) }}">{{ message.attachmentName }}</a>
+                                            {% else %}{{ message.message|striptags('<a>')|raw|nl2br }}{% endif %}</div>
+                                            
+                                      
+                                    </div>
+                                  </div>
+                                {% endfor %}
+                              {# </div>
+                            {% endfor %} #}
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <div class="attach_full_sidebar">
+                            <div id="attached_image" class="chat_attached_image"></div>
+                        </div>
+                        <div class="input-group">
+                            <div class="input-group-btn">
+                              <form>
+                              <button  type="button" class="btn btn-primary btn-flat chat_message_send_btn chat_message_send_attachment" id='attachment_label'>
+                                    <span>
+                                        <svg>
+                                            <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#attachment') }}"></use>
+                                        </svg>
+                                    </span>
+                                </button>
+                                <input type="file" id="attachment" accept=".pdf, .doc, .docx, .rtf, .txt, .jpg, .jpeg, .png" class="inputfile inputfile-3" data-href="{{ path('admin_message_send', {'user': user.id}) }}" 
+                                name="my_file[]" multiple/>
+                                
+
+                              </form>
+                            </div>
+                            <textarea onkeyup="autoSize(this);" type="text" name="message" id="direct-chat-message" placeholder="Type Message ..." class="form-control chat_message_send_textarea" autofocus ></textarea>
+                            <span class="input-group-btn">
+                                <button type="button" id="direct-chat-send" class="btn btn-primary btn-flat chat_message_send_btn">
+                                    <span>
+                                        <svg width="25" height="25">
+                                            <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#send') }}"></use>
+                                        </svg>
+                                    </span>
+                                </button>
+                                <button type="button" id="direct-chat-update" style='display:none'  class="btn btn-primary btn-flat chat_message_send_btn">
+                                    <span>
+                                        <svg width="25" height="25">
+                                            <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#send') }}"></use>
+                                        </svg>
+                                    </span>
+                                </button>
+                                
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    {#Modals#}
+
+    <div class="modal modal-success fade" id="modal-approve" style="display: none;">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">??</span></button>
+                <h4 class="modal-title">Approve Order</h4>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you want to complete this order?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cancel</button>
+                <a href="#" class="btn btn-outline">Confirm</a>
+              </div>
+            </div>
+            <!-- /.modal-content -->
+          </div>
+          <!-- /.modal-dialog -->
+        </div>
+
+        <div class="modal modal-danger fade" id="modal-cancel" style="display: none;">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">??</span></button>
+                <h4 class="modal-title">Cancel Order</h4>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you want to cancel this order?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cancel</button>
+                <a href="#" class="btn btn-outline">Confirm</a>
+              </div>
+            </div>
+            <!-- /.modal-content -->
+          </div>
+          <!-- /.modal-dialog -->
+        </div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="{{ asset('bundles/admin/plugins/CustomFileInputs/js/custom-file-input.js') }}"></script>
+<script src="{{ asset('bundles/admin/js/jquery.js') }}"></script>
+<script src="{{ asset('bundles/admin/plugins/slimScroll/jquery.slimscroll.min.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+<script src="{{ asset('bundles/admin/js/perfect-scrollbar.jquery.min.js') }}"></script>
+<script>
+
+    function autoSize(ele)
+    {
+        if( ele.scrollHeight < 59 )
+        {
+            ele.style.height = '50px';
+        }
+        else
+        {
+            ele.style.height = 'auto';
+            var newHeight = (ele.scrollHeight > 30 ? ele.scrollHeight : 30);
+            if( newHeight.toString() < 155 )    
+                ele.style.overflow = "hidden";
+            else 
+                ele.style.overflow = "auto";
+            ele.style.height = newHeight.toString() + 'px';
+        }
+    }
+
+
+    $(document).contextmenu(function() {
+        return false;
+    });
+
+    var update_message_id = null;
+
+    function update_message( id  )
+    {
+        $("#direct-chat-send").hide();
+        $("#direct-chat-update").show();
+        update_message_id = id;
+        $("#direct-chat-message").val( $('#message-'+update_message_id+'-body').html() );
+        
+    }
+
+    $("#direct-chat-update").click( function(){
+        var url = '{{ path('admin_message_update', {'message': 'message_id'}) }}';
+        url = url.replace('message_id', update_message_id);
+        var new_message_val = $("#direct-chat-message").val();
+
+        var data = { mess_data : new_message_val };
+        data = JSON.stringify(data);
+
+        $.ajax({
+            url:  url,
+            type: "POST",
+            dataType: 'json',
+            cache: false,
+            contentType: 'application/json',
+            processData: true,
+            data: data ,
+            success: function (resp) {
+                if($("#svg-" + update_message_id).length == 0) {
+                    $('#message-' + update_message_id+'-body').before('<svg id = "svg-' + update_message_id + '" class="message-edit-marker-svg message-edit-mark-show"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/bundles/admin/css/sprite.svg#edit-pencil-icons"></use></svg>');
+                }
+                    $('#message-' + update_message_id+'-body').html( new_message_val );
+            },
+            error: function() {
+                getErrorNoty('File not found');
+            }
+        });
+
+        $("#direct-chat-send").show();
+        $("#direct-chat-update").hide();
+        $("#direct-chat-message").val('');
+
+        return false;
+    });
+
+    function delete_message(id) {
+        
+        var url = '{{ path('admin_message_delete', {'message': 'message_id'}) }}';
+        url = url.replace('message_id', id);
+        
+
+        $.ajax({
+            url:  url,
+            type: "POST",
+            dataType: 'text',
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (resp) {
+                var message_ele = $('#message-' + id);
+                if(message_ele.prev().hasClass('message-group-date')){
+                    message_ele.prev().remove();
+                }
+                $('#message-'+id).remove();
+            },
+            error: function() {
+                getErrorNoty('File not found');
+            }
+        });
+
+        return false;
+    }
+ 
+    
+    $('.approve').on('click', function(e) {
+        var url = $(this).data('url');
+        $(".modal-footer a").attr('href', url);
+    });
+
+    $('.cancel').on('click', function(e) {
+        var url = $(this).data('url');
+        $(".modal-footer a").attr('href', url);
+    });
+
+    
+    function getCurrentDate()
+    {
+       var today = new Date();
+       var dd = today.getDate();
+       var mm = today.getMonth() + 1;
+
+       var yyyy = today.getFullYear();
+       if(dd<10) {
+          dd='0'+dd;
+       } 
+       if(mm<10){
+          mm='0'+mm;
+       } 
+       var today = yyyy + '-' + dd + '-' + mm;
+
+       return today;
+    }
+
+    function formatAMPM(date) {
+      var hours = date.getHours();
+      var minutes = date.getMinutes();
+      var ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; 
+      minutes = minutes < 10 ? '0'+minutes : minutes;
+      var strTime = hours + ':' + minutes + ' ' + ampm;
+
+      return strTime;
+    }
+
+    $(document).ready(function(){
+
+        $("#attachment_label").click( function(){
+            $("#attachment").click();
+        });
+
+        $(document).mouseup(function(e) {
+                var container = $(".message_event_select");
+                if (!container.is(e.target) && container.has(e.target).length === 0) 
+                {  $(".contextMenu_set").hide(); }
+        });
+
+        /*
+        $(document).click(function(){
+            $(".contextMenu_set").hide();
+        });
+
+         $(".media-body").mousedown(function(e){
+            if (event.which == 3) {
+                var elementid = $(this).attr('id');
+                console.log( elementid );
+                $("#context" + elementid ).show();
+            }
+        }); */
+        $(".message_event_select").click(function() {
+                $(".contextMenu_set").hide();
+                var elementid = $(this).attr('id');
+                $("#context" + elementid ).show();
+        });
+
+        $('.chat').perfectScrollbar({
+            wheelSpeed: 1,
+            minScrollbarLength: 20
+        });
+
+        $('.chat').scrollTop($('.chat')[0].scrollHeight);
+
+        $.each($('.message-date'), function () {
+            var utcDate = moment.utc($(this).data('utc-date'));
+            var localDate = utcDate.local();
+            $(this).append(formatAMPM(localDate.toDate()))
+        })
+
+        $('.direct-chat-send').attr('disabled', true);
+
+        /* $(document).on('keydown', '#direct-chat-message', function (e) {
+            if (e.keyCode === 13 && !e.shiftKey) {
+                e.preventDefault();
+            }
+        }); */
+
+        var attachment = new Array();
+
+        function addAttachment( file )
+        {
+            var uuid = parseInt(Math.random()*100000);
+            var imgID = "attach_file" + uuid ;
+            var divID = "attach_div" + uuid ;
+            var btnID = "attach_btn" + uuid ;
+            
+            $("#attached_image").append( "<div class='attach_img_same_row' id='" + divID + "'><img id='" + imgID + "' src='#' ><label class='attach_image_footer' >"+file.name+"</label><img class='close_btn' src='/bundles/admin/images/close.png' id='" + btnID + "'></div>" );
+
+            if( file.type.substring( 0 , 5 ) == "image" )
+            {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $( "#" + imgID ).attr( "src" , e.target.result);
+                }
+                reader.readAsDataURL( file );
+            } 
+            else
+            {
+                $( "#" + imgID ).attr( "src" , "{{ asset('bundles/admin/images/docx.png') }}" );
+            }
+
+            $( "#" + btnID).click(function(){
+                $("#" + divID).remove();
+                var i;
+                for( i = 0 ; i < attachment.length; i++ )
+                    if( attachment[i].id == uuid )
+                    {
+                        attachment.splice( i , 1 );
+                        break;
+                    }
+            });
+            attachment.push( { id : uuid , file:file} );
+        }
+
+        function sendAttachment()
+        {
+            var i;
+            for( i = 0 ; i < attachment.length ; i++ )
+            {
+                var data = new FormData();
+                data.append('attachment', attachment[i].file);  
+                sendMessage(data);
+            }
+            attachment = [];
+            $("#attached_image").empty();
+        }
+
+        $(document).on('keyup', '#direct-chat-message', function (e) {
+            e = e || window.event;
+            var $this = $('#direct-chat-message')
+        /*    if ((e.keyCode === 13 && !e.shiftKey) && ($this.val().length !== 0 || attachment.length )) {
+                if($this.val())
+                    sendMessage({message: $this.val()});
+                if (attachment.length) 
+                    sendAttachment();
+            }   */
+        });
+
+        $('#direct-chat-send').click(function () {
+            
+            if ($('#direct-chat-message').val().length !== 0 || attachment.length) {
+                if($('#direct-chat-message').val()) 
+                   sendMessage({message: $('#direct-chat-message').val()});
+
+                if (attachment.length) 
+                    sendAttachment();
+            }
+            $("#direct-chat-message").style.cssText = 'height: 50px';
+
+        });
+
+        $(document).on('click', '.has-attachment', function(e) {
+            e.preventDefault();
+            $('#attachment').wrap('<form>').closest('form').get(0).reset();
+            $('#attachment').unwrap();
+            $(this).find('i').addClass('fa-paperclip').removeClass('fa-trash');
+            $(this).removeClass('has-attachment')
+            $('#attachment').prop('disabled', false)
+            $('#direct-chat-message').prop('disabled', false)
+            $('#direct-chat-message').val('')
+        })
+
+        $(document).on('change', '.inputfile', function() {
+            if ($(this)[0].files.length) {
+
+                var url = $(this).attr('data-href');
+                var i;
+                
+                for( i = 0 ; i < $(this)[0].files.length ; i++ )
+                    addAttachment( $(this)[0].files[i] )
+
+                //$(this).parent().find('i').removeClass('fa-paperclip').addClass('fa-trash');
+                //$(this).prop('disabled', true)
+                //$(this).parent().addClass('has-attachment')
+                //$('#direct-chat-message').val($(this)[0].files[0].name)
+                //$('#direct-chat-message').prop('disabled', true)
+            }
+        });
+
+        function makeToHyperlink(str) {
+            var urlRegex = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
+            return str.replace(urlRegex, function(url) {
+                return '<a href="' + url + '" target="_blank">' + url + '</a>';
+            });
+        }
+       /* function removeScrooldiv(){
+            $(".ps__scrollbar-x-rail").remove();
+            $(".ps__scrollbar-y-rail").remove();
+        }
+
+        setTimeout(removeScrooldiv, 1000); */
+
+        function sendMessage(data) 
+        { 
+            if (data.message) {
+                data.message = data.message.replace(/\n/g, '\r\n');
+                data.message = makeToHyperlink(data.message);
+            }
+
+            if (!data.message) {
+                $.ajaxSetup({
+                    dataType: 'text',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                });
+            } else {
+                data = JSON.stringify(data)
+                $.ajaxSetup({
+                    dataType: 'json',
+                    cache: false,
+                    contentType: 'application/json',
+                    processData: true,
+                });
+            } 
+            
+
+            $.ajax({
+                method: "POST",
+                url: "{{ path('admin_message_send', {'user': user.id}) }}",
+                data: data,
+                success: function (resp) {
+                    var html;
+
+                    /* var maximum = null;
+                    $('.media_element_set').each(function() {
+                        var value = parseInt($(this).attr('data-uid'));
+                        maximum = ((value > maximum) && (resp.message_id > value)) ? value : maximum;
+                    }); */
+
+                    if (resp.message) {
+                        var message = resp.message.replace(/(?:\r\n|\r|\n)/g, '<br />');
+
+                        html = '<div class="row media media_element_set sms-sender" id="message-'+resp.message_id+'"><div class="col-sm-10 media_col_element chat-message-select-area">' 
+                            + '<span class="message_event_select" id="span-'+resp.message_id+'-body"><svg width="11" height="8">' 
+                            +'<use xlink:href="/bundles/admin/css/sprite.svg#chat-more-option"></use></svg></span>' 
+                            + '<div id="contextspan-'+resp.message_id+'-body" class="contextMenu_set">'
+                            + '<li data-action="update" onclick="update_message( ' + resp.message_id +' )">Edit</li>'
+                            + '<li data-action="remove" onclick="delete_message( ' + resp.message_id +' )">Remove</li></div>'
+                            + '<div class="message-date">'+ resp.sendername +' | ' + formatAMPM(new Date()) + '</div><svg id = "svg-' + resp.message_id
+                            + '" class="message-edit-marker-svg"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/bundles/admin/css/sprite.svg#edit-pencil-icons"></use></svg><div class="media-body" id="message-'+resp.message_id+'-body">'
+                            + message + '</div></div></div>';
+
+                        $('.chat-messages').append(html)
+                    } else {
+                        resp = jQuery.parseJSON(resp);
+
+                        html = '<div class="row media media_element_set sms-sender" id="message-'+resp.message_id+'"><div class="col-sm-10 media_col_element chat-message-select-area">'
+                                + '<span class="message_event_select" id="span-'+resp.message_id+'-body"><svg width="11" height="8">' 
+                                + '<use xlink:href="/bundles/admin/css/sprite.svg#chat-more-option"></use></svg></span>' 
+                                + '<div id="contextspan-'+resp.message_id+'-body" class="contextMenu_set">' 
+                                + '<li data-action="remove" onclick="delete_message( ' + resp.message_id +'  )">Remove</li></div>'
+                                + '<div class="message-date">' + resp.sendername +' | ' + formatAMPM(new Date()) + '</div><svg id = "svg-' + resp.message_id
+                                + '" class="message-edit-marker-svg"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/bundles/admin/css/sprite.svg#edit-pencil-icons"></use></svg><div class="media-body" id="message-'+resp.message_id+'-body">' 
+                                + '<i class="fa fa-paperclip fa-lg"></i>'
+                                + '<a href="' + resp.download_link + '">' + resp.attachment_name + '</a></div></div></div>';
+
+                        $('.chat-messages').append(html)
+                    }
+
+                    $('.chat').animate({scrollTop: $('.chat')[0].scrollHeight});
+
+                    $(document).unbind( "click" );
+                    $(".media-body").unbind( "mousedown" );
+                    
+                    $(".media-body").mousedown( function(e){
+                        if (event.which == 3) {
+                            var elementid = $(this).attr('id');
+                            $("#context" + elementid ).show();
+                        }
+                    });
+
+                    $(".message_event_select").click(function() {
+                            $(".contextMenu_set").hide();
+                            var elementid = $(this).attr('id');
+                            $("#context" + elementid ).show();
+                    });
+
+                    $(document).click(function(){
+                        $(".contextMenu_set").hide();
+                    });
+
+                    $('#direct-chat-message').val('');
+                    $('.direct-chat-send').attr('disabled', false);
+                    getSuccessNoty('Sent'); 
+                    
+                    $("#attachment").parent().find('i').addClass('fa-paperclip').removeClass('fa-trash');
+                    $("#attachment").parent().removeClass('has-attachment')
+                    $('#attachment').prop('disabled', false)
+                    $('#direct-chat-message').prop('disabled', false)
+                    $('#direct-chat-message').val('')
+
+                },
+                error: function(resp) {
+                    var data = JSON.parse(resp.responseText);
+                    getErrorNoty(data.message);
+                }
+            })
+        }
+
+        (function worker() {
+            $.ajax({
+                url: '{{ path('admin_message_get', {'user': user.id}) }}',
+                success: function(resp) {
+                    if (resp.length !== 0) {
+                        data = JSON.parse(resp);
+
+                        /*  var maximum = null;
+                        $('.media_element_set').each(function() {
+                            var value = parseInt($(this).attr('data-uid'));
+                            maximum = ((value > maximum) && (resp.message_id > value)) ? value : maximum;
+                        }); */ 
+
+                        data.forEach(function (message) {
+                          if (message.attachment_name) {
+                            html = '<div class="row media media_element_set sms-recipient" id="message-'+message.message_id+'"><div class="col-sm-10 media_col_element"><div class="message-date"> ' + message.sendername + ' | ' + formatAMPM(new Date()) + '</div><div class="media-body">' +
+                                   '<i class="fa fa-paperclip fa-lg"></i> ' +
+                                   '<a href="' + message.download_link + '">' + message.attachment_name +
+                                   '</a></div></div></div>';
+
+                            $('.chat-messages').append(html)
+                          } else {
+                            var html = '<div class="row media media_element_set sms-recipient"><div class="col-sm-10 media_col_element"><div class="message-date">' + message.sendername + ' | ' + formatAMPM(new Date()) + '</div><div class="media-body">'
+                                     + message.message +
+                                       '</div></div></div>';
+
+                            $('.chat-messages').append(html)
+                          }
+
+                            $('.chat').animate({scrollTop: $('.chat')[0].scrollHeight})
+                        });
+                    }
+                },
+                complete: function() {
+                    setTimeout(worker, 5000);
+                }
+            });
+        })();
+    });
+</script>
+{% endblock %}

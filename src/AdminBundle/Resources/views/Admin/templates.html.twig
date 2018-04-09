@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Documents{% endblock %}
+{% block sub_small_title %}List of all documents{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-file"></i> Documents</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-body">
+                   <div id="documents" class="panel-collapse">
+                        {{ form_start(file_form) }}
+                        <div class="form-group">
+                        <div>{{ form_row(file_form.type) }}</div>
+                            <div>{{ form_row(file_form.template) }}</div>
+                        </div>
+                        <div class="form-group">
+                        {{ form_row(file_form.submit, {'label': false}) }}
+                        </div>
+                        {{ form_end(file_form) }}
+                        <hr>
+                        {% if templates %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Document Name</th>
+                                    <th>Document Type</th>
+                                    <th>Added By</th>
+                                    <th>Date Added</th>
+                                    <th>Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for item in templates %}
+                                <tr>
+                                    <td><a href="{{ path('template_link', {'template': item.id}) }}">{{ item.name }}</td>
+                                    <td>{{ item.type }}</td>
+                                    <td>{{ item.addedBy }}</td>
+                                    <td>{{ item.dateAdded | date('n/d/y') }}</td>
+                                    <td class="text-center"><a href="{{ path('template_remove', {'template': item.id}) }}"><i class="fa fa-close"></i></a></td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            No documents
+                        {% endif %}
+                            </tbody>
+                        </table>
+                        </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

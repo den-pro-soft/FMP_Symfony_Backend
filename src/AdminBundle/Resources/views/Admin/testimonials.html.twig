@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Testimonials{% endblock %}
+{% block sub_small_title %}List of all testimonials{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-file"></i> Testimonials</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-body">
+                    <div class="col-xs-4">
+                        <a href="{{ path('add_testimonial') }}" class="btn btn-success"><i class="fa fa-plus"></i></a>
+                    </div>
+                    <div class="col-xs-offset-6 col-xs-2 text-right">
+                        <form method="post">
+                            <div class="input-group input-group-sm">
+                                <select class="form-control" name="filter">
+                                    <option value="">All</option>
+                                    <option {% if filter == 'career-finder' %} selected {% endif %} value="career-finder">Career Finder</option>
+                                    <option {% if filter == 'resume-makeover' %} selected {% endif %} value="resume-makeover">Resume Makeover</option>
+                                    <option {% if filter == 'cover-letter-writing' %} selected {% endif %} value="cover-letter-writing">Cover Letter</option>
+                                    <option {% if filter == 'linkedin-profile-makeover' %} selected {% endif %} value="linkedin-profile-makeover">LinkedIn</option>
+                                    <option {% if filter == 'interview-training' %} selected {% endif %} value="interview-training">Interview Training</option>
+                                    <option {% if filter == 'show-on-homepage' %} selected {% endif %} value="show-on-homepage">Show on homepage</option>
+                                </select>
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-info btn-flat">Apply</button>
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-body">
+                    {% if pages > 1 %}
+                        {% include '@Admin/Admin/pagination.html.twig' with {'route': 'list_testimonials', 'filter': filter} %}
+                    {% endif %}
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Detail</th>
+                            <th>Rating</th>
+                            <th>Help with</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for testimonial in testimonials %}
+                        <tr>
+                            <td><a href="{{ path('edit_testimonial', {'testimonial': testimonial.id}) }}">{{ testimonial.name }}</a></td>
+                            <td>{{ testimonial.detail|length > 100 ? testimonial.detail|slice(0, 100) ~ '...' : testimonial.detail  }}</td>
+                            <td>{{ testimonial.rating }}</td>
+                            <td>{{ testimonial.service.name }}</td>
+                            <td><a href="{{ path('delete_testimonial', {'testimonial': testimonial.id}) }}" class="btn btn-danger"><i class="fa fa-trash"></i></a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                    {% if pages > 1 %}
+                        {% include '@Admin/Admin/pagination.html.twig' with {'route': 'list_testimonials', 'filter': filter} %}
+                    {% endif %}
+            </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

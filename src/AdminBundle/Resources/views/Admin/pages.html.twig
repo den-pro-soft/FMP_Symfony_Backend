@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Pages{% endblock %}
+{% block sub_small_title %}List of all pages{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-file"></i> Page</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+        <div class="box">
+        <div class="box-body">
+            <table id="example1" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for page in pages %}
+                    <tr>
+                        <td><a href="{{ path('edit_page', {'page': page.id}) }}">{{ page.title }}</a></td>
+                        <td>{{ page.description }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td>
+                        <a href="{{ path('view_resume_samples') }}">Find My Profession: Resume Samples | Sample Resumes</a>
+                    </td>
+                    <td>
+                        Check out a variety of senior and executive resume samples written by Find My Profession for their clients.
+                        Each of the resume samples below have successfully landed our clients in a senior or executive level role with prestigious companies spanning from top startups to Fortune 500 organizations.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,275 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/component.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/modal_component.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/admin/css/custom_modal.css') }}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        .box-body table>thead>tr>th, .box-body table>tbody>tr>td{
+            vertical-align: middle;
+            padding: 12px !important;
+        }
+        .resume-featured-image {
+            width: 100px;
+            padding: 4px;
+            line-height: 1.6;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 0;
+            transition: all .2s ease-in-out;
+            height: auto;
+            cursor: pointer;
+        }
+        .modal {
+            opacity: 1;
+            padding: 100px 0 0 !important;
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+            overflow: auto;
+        }
+
+        /* Caption of Modal Image */
+        #caption {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            height: 150px;
+        }
+
+        /* Modal Content (image) */
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 70% !important;
+            max-width: 700px !important;
+            height: auto !important;
+        }
+
+        /* Add Animation */
+        .modal-content, #caption {
+            -webkit-animation-name: zoom;
+            -webkit-animation-duration: 0.6s;
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+
+        @-webkit-keyframes zoom {
+            from {-webkit-transform:scale(0)}
+            to {-webkit-transform:scale(1)}
+        }
+
+        @keyframes zoom {
+            from {transform:scale(0)}
+            to {transform:scale(1)}
+        }
+
+        /* The Close Button */
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            opacity: 1;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* 100% Image Width on Smaller Screens */
+        @media only screen and (max-width: 700px){
+            .modal-content {
+                width: 100%;
+            }
+        }
+        .sort:hover {
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block header %}
+    <h1>
+        Resume Samples
+        <small>List of resume samples</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="{{ path('view_list_pages') }}"><i class="fa fa-users"></i> Pages</a></li>
+        <li class="active"><i class="fa fa-list"></i> Resume Samples</li>
+    </ol>
+{% endblock %}
+
+{% block content %}
+{% set queryParams = app.request.query.all %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-body">
+                    <div class="col-xs-2">
+                        <a href="{{ path('add_resume_sample') }}" class="btn btn-success"><i class="fa fa-plus"></i></a>
+                    </div>
+                    <form method="post" action="{{ path('view_resume_samples') }}">
+                        <div class="col-xs-4">
+                            <div class="input-group input-group-sm">
+                                <input class="form-control" type="text" id="query" name="query" value="{{ query }}">
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-info btn-flat">Search</button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-xs-2"></div>
+                        <div class="col-xs-4 text-right">
+                            <div class="input-group input-group-sm">
+                                <select class="form-control" name="filter" id="filter">
+                                    <option value="">All</option>
+                                    <option {% if filter == 'senior' %} selected {% endif %} value="senior">Senior & Executive Resume Samples</option>
+                                    <option {% if filter == 'entry' %} selected {% endif %} value="entry">Entry & Mid Resume Samples</option>
+                                </select>
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-info btn-flat">Apply</button>
+                                </span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-body">
+                    <table class="table table-bordered table-striped dataTable">
+                        <thead>
+                        <tr>
+                            <th class="text-center" width="100"></th>
+
+                            {% if queryParams.sort_field is not defined or queryParams.sort_field == 'title' %}
+                                {% if queryParams.sort_order is defined and queryParams.sort_order == 'desc' %}
+                                    <th class="sort sorting_desc text-center" data-sort-field="title" data-next-sort-order="asc">Title</th>
+                                {% else %}
+                                    <th class="sort sorting_asc text-center" data-sort-field="title" data-next-sort-order="desc">Title</th>
+                                {% endif %}
+                            {% else %}
+                                <th class="text-center sort" data-sort-field="title" data-next-sort-order="desc">Title</th>
+                            {% endif %}
+
+                            {% if queryParams.sort_field is defined and queryParams.sort_field == 'category' %}
+                                {% if queryParams.sort_order is defined and queryParams.sort_order == 'desc' %}
+                                    <th class="text-center sort sorting_desc" width="150" data-sort-field="category" data-next-sort-order="asc">Category</th>
+                                {% else %}
+                                    <th class="text-center sort sorting_asc" width="150" data-sort-field="category" data-next-sort-order="desc">Category</th>
+                                {% endif %}
+                            {% else %}
+                                <th class="text-center sort" width="150" data-sort-field="category" data-next-sort-order="desc">Category</th>
+                            {% endif %}
+
+                            {% if queryParams.sort_field is defined and queryParams.sort_field == 'status' %}
+                                {% if queryParams.sort_order is defined and queryParams.sort_order == 'desc' %}
+                                    <th class="text-center sort sorting_desc" width="80" data-sort-field="status" data-next-sort-order="asc">Status</th>
+                                {% else %}
+                                    <th class="text-center sort sorting_asc" width="80" data-sort-field="status" data-next-sort-order="desc">Status</th>
+                                {% endif %}
+                            {% else %}
+                                <th class="text-center sort" width="80" data-sort-field="status" data-next-sort-order="desc">Status</th>
+                            {% endif %}
+
+                            <th class="text-center" width="50">Preview</th>
+
+                            {% if queryParams.sort_field is defined and queryParams.sort_field == 'created_at' %}
+                                {% if queryParams.sort_order is defined and queryParams.sort_order == 'desc' %}
+                                    <th class="text-center sort sorting_desc" width="110" data-sort-field="created_at" data-next-sort-order="asc">Created At</th>
+                                {% else %}
+                                    <th class="text-center sort sorting_asc" width="110" data-sort-field="created_at" data-next-sort-order="desc">Created At</th>
+                                {% endif %}
+                            {% else %}
+                                <th class="text-center sort" width="110" data-sort-field="created_at" data-next-sort-order="desc">Created At</th>
+                            {% endif %}
+
+                            {% if queryParams.sort_field is defined and queryParams.sort_field == 'updated_at' %}
+                                {% if queryParams.sort_order is defined and queryParams.sort_order == 'desc' %}
+                                    <th class="text-center sort sorting_desc" width="110" data-sort-field="updated_at" data-next-sort-order="asc">Updated At</th>
+                                {% else %}
+                                    <th class="text-center sort sorting_asc" width="110" data-sort-field="updated_at" data-next-sort-order="desc">Updated At</th>
+                                {% endif %}
+                            {% else %}
+                                <th class="text-center sort" width="110" data-sort-field="updated_at" data-next-sort-order="desc">Updated At</th>
+                            {% endif %}
+
+                            <th class="text-center" width="80">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for sample in samples %}
+                            <tr>
+                                <td class="text-center">
+                                    <img class="resume-featured-image" src="{{ vich_uploader_asset(sample, 'image') }}" alt="{{ sample.title | capitalize }}">
+                                </td>
+                                <td class="text-center"><a href="{{ path('edit_resume_sample', {'sample': sample.id}) }}">{{ sample.title | capitalize }}</a></td>
+                                <td class="text-center">
+                                    {% if sample.category == 'senior' %}
+                                        Senior & Executive
+                                    {% else %}
+                                        Entry & Mid
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ sample.status | capitalize }}</td>
+                                <td class="text-center">
+                                    <a class="resume-template" href="{{ vich_uploader_asset(sample, 'pdf', 'RestBundle\\Entity\\ResumeSample') }}" target="_blank">
+                                        <img src="{{ asset('bundles/admin/images/pdf-icon.png') }}" width="35" height="35">
+                                    </a>
+                                </td>
+                                <td class="text-center">{{ sample.createdAt | date('Y-m-d') }}</td>
+                                <td class="text-center">{{ sample.updatedAt | date('Y-m-d') }}</td>
+                                <td class="text-center">
+                                    <a href="{{ path('edit_resume_sample', {'sample': sample.id}) }}" class="btn btn-danger btn-sm"><i class="fa fa-edit"></i></a>
+                                    <a href="{{ path('delete_resume_sample', {'sample': sample.id, 'page': current, 'filter': filter}) }}" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="img01">
+        <div id="caption"></div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+        {% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+
+        $(document).ready(function () {
+            $('.resume-featured-image').click(function () {
+                $('#myModal').css('display', 'block');
+                $('#img01').attr('src', $(this).attr('src'));
+                $('#caption').html($(this).attr('alt'));
+            });
+
+            $('.close').click(function () {
+                $('#myModal').css('display', 'none');
+            });
+
+            var path = "{{currentPath}}";
+            $(document).on('click', '.sort', function() {
+                path = path + '?sort_field=' + $(this).data('sort-field') + '&sort_order=' + $(this).data('next-sort-order') + '&query=' + $('#query').val() + '&filter=' + $('#filter').find(':selected').val();
+                window.location.href = path
+            })
+        });
+    </script>
+{% endblock %}

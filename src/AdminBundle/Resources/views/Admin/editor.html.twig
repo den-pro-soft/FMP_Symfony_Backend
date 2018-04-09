@@ -1,0 +1,127 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+<style>
+    .description-form-error-message ul{
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block sub_title %}Content editor{% endblock %}
+{% block sub_small_title %}{% endblock %}
+
+{% block breadcrumb %}
+    <li><a href="{{ path('view_list_blog') }}"><i class="fa fa-users"></i> Career Advices</a></li>
+    <li class="active"><i class="fa fa-file"></i> Page</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                {{ form_start(form) }}
+                <div class="box-body">
+                    <div class="form-group">
+                        <div class="col-sm-6">{{ form_row(form.title) }}</div>
+                        <div class="col-sm-6">{{ form_row(form.url) }}</div>
+                        <div class="col-sm-6">{{ form_row(form.seoTitle) }}</div>
+                        <div class="col-sm-6 description-form-error-message">{{ form_row(form.description) }}</div>
+                        <div class="col-sm-6">{{ form_row(form.status) }}</div>
+                        <div class="col-sm-6">
+                            {{ form_label(form.category) }}
+                            <div class="clearfix"></div>
+                            {% for category in form.category %}
+                                {% if loop.index == 1 %}
+                                    <div class="col-xs-3">
+                                {% else %}
+                                    <div class="col-xs-2">
+                                {% endif %}
+                                    {{ form_errors(category) }}
+                                    {{ form_widget(category) }}
+                                    <span>{{ category.vars.label }}</span>
+                                    </div>
+                            {% endfor %}
+                        </div> 
+                        <div class="col-sm-12">{{ form_row(form.content) }}</div>
+                        <div class="col-sm-12">
+                            {% if form.image.vars.download_uri is defined %}
+                                <img id="title-image" style="padding-top: 10px;" src="{{ vich_uploader_asset(form.image.vars.object, 'image') }}" />
+                                {{ form_widget(form.image) }}
+                            {% else %}
+                                <img id="title-image" style="padding-top: 10px;" />
+                                {{ form_row(form.image) }}
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-12">{{ form_row(form.imageAlt) }}</div>
+                        <div class="col-sm-12" style="padding-top: 10px;">
+                            <div class="box box-primary">
+                                <div class="box-header with-border">
+                                    {{ form_label(form.author) }}
+                                </div>
+                                <div class="box-body">
+                                    {% for author in form.author %}
+                                        {% if author.vars.download_uri is defined %}
+                                            {% if author.vars.download_uri %}
+                                                <img id="avatar-image" style="padding-top: 10px;" onError='this.onerror=null;this.src="{{asset("bundles/admin/images/default_author_logo.png")}}"' src="{{ vich_uploader_asset(form.author.vars.value, 'avatar') }}" />
+                                            {% else %}
+                                                <img id="avatar-image" style="padding-top: 10px;" src="{{ asset("bundles/admin/images/default_author_logo.png") }}" />
+                                            {% endif %}
+                                            {{ form_widget(author) }}
+                                        {% else %}
+                                            {% if author.vars.name == 'avatar' %}
+                                              <img id="avatar-image" style="padding-top: 10px;" />
+                                            {% endif %}
+                                            {{ form_row(author) }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if form.submit is defined %}
+                <div class="box-footer">
+                    {{ form_widget(form.submit) }}
+                </div>
+                {% endif %}
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+  <script>
+   function readURL(input, $img) {
+     if (input.files && input.files[0]) {
+       var reader = new FileReader();
+
+       reader.onload = function (e) {
+         $img.attr('src', e.target.result);
+       }
+
+       reader.readAsDataURL(input.files[0]);
+     }
+     
+   }
+   $(document).on('ready', function() {
+     $(document).on('change', '#admin_bundle_editor_type_image_file', function () {
+       readURL(this, $('#title-image'))
+     });
+
+     $(document).on('change', '#admin_bundle_editor_type_author_avatar_file', function () {
+       readURL(this, $('#avatar-image'))
+     });
+
+     $('#admin_bundle_editor_type_title').on('keypress', function (event) {
+       var regex = new RegExp("^[a-zA-Z0-9\ ,\.\?!]+$");
+       var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+       if (!regex.test(key)) {
+         event.preventDefault();
+         return false;
+       }
+     });
+   })
+  </script>
+{% endblock %}

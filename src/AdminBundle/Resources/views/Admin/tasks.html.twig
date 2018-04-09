@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Admin Tasks{% endblock %}
+{% block sub_small_title %}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('bundles/multiselect/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/component.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/admin/css/admin.css') }}">
+{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-user"></i> Tasks</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <ul class="nav nav-tabs pull-right">
+                    <li><a href="{{ path('list_tasks', {'user': app.user.id, 'filter': 'active'}) }}" {% if filter_val == 'active' %} class="userfilter_select" {% endif %}>Active</a></li>
+                    <li><a href="{{ path('list_tasks', {'user': app.user.id, 'filter': 'complete'}) }}" {% if filter_val == 'complete' %} class="userfilter_select" {% endif %}>Complete</a></li>
+                </ul>
+                <div class="box-body">
+                    {% if tasks[0] is defined %}
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                {% if app.user.isSuperAdmin or app.user.isAdminManager %}
+                                    <th class="col-md-1 text-center task-table-header">Admin Name</th>
+                                {% endif %}
+                                <th class="col-md-1 text-center task-table-header">Client Name</th>
+                                <th class="col-md-3 text-center task-table-header">Tasks</th>
+                                <th class="col-md-1 text-center task-table-header">
+                                    Completed?<br>
+                                    <div class="complete-emoji">(Yes)</div>
+                                    <div class="complete-emoji">(No)</div>
+                                </th>
+                                <th class="col-md-1 text-center task-table-header">{% if filter_val == 'active' %}Due Date{% else %}Completed Date{% endif %}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for task in tasks %}
+                                {% set client_index = 0 %}
+                                {% for client in task['clients'] %}
+                                    <tr>
+                                        {% if (app.user.isSuperAdmin or app.user.isAdminManager) and client_index == 0 %}
+                                            <td rowspan="{{ task['clients']|length }}" class="text-center task-item-name">
+                                                {{ task['admin'] }}
+                                            </td>
+                                        {% endif %}
+                                        <td class="text-center task-item-name">
+                                            {{ client['name'] }}
+                                        </td>
+                                        <td class="text-center">
+                                            {% for task_item in client['tasks'] %}
+                                                <div class="task-item-wrapper task-item-wrapper-base task-item-wrapper-{{ task_item['id'] }}" data-id="{{ task_item['id'] }}">
+                                                    {% if task_item['contact_name'] == '' %}
+                                                        {{ task_item['name'] }} : {{ task_item['contact_title'] }}
+                                                    {% else %}
+                                                        {{ task_item['name'] }} : <a href="{{ task_item['contact_link'] }}">{{ task_item['contact_name'] }}</a> - {{ task_item['contact_title'] }}
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% for task_item in client['tasks'] %}
+                                                <div class="task-item-wrapper task-item-wrapper-{{ task_item['id'] }}">
+                                                    <div class="complete-emoji {% if task_item['completed'] != 'yes' %}not-selected{% endif %}" data-task="{{ task_item['id'] }}" data-completed="yes">
+                                                        <img src="{{ asset('bundles/admin/images/emoji_smile.png') }}" width="25" height="25">
+                                                    </div>
+                                                    <div class="complete-emoji {% if task_item['completed'] != 'no' %}not-selected{% endif %}" data-task="{{ task_item['id'] }}" data-completed="no">
+                                                        <img src="{{ asset('bundles/admin/images/emoji_sad.png') }}" width="25" height="25">
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% for task_item in client['tasks'] %}
+                                                <div class="task-item-wrapper  task-item-wrapper-{{ task_item['id'] }} {{ task_item['due_class'] }}">
+                                                    {{ task_item['due_date'] }}
+                                                </div>
+                                            {% endfor %}
+                                        </td>
+                                    </tr>
+                                    {% set client_index = client_index + 1 %}
+                                {% endfor %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        No tasks.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $(".complete-emoji").click(function(){
+            if($(this).hasClass('not-selected')){
+                var task = $(this).data('task');
+                var completed = $(this).data('completed');
+                $.ajax({
+                    url: '{{ path('task_change') }}',
+                    type: 'POST',
+                    data: {
+                        task: task,
+                        completed: completed
+                    },
+                    success: function(data){
+                        if(data.status == 'Ok'){
+                            $('.task-item-wrapper-' + task).each(function(){
+                                $(this).remove();
+                            });
+                        } else {
+                            alert('Cannot connect to server. Please try later');
+                        }
+                    }
+                });
+            }
+        });
+
+        $(".task-item-wrapper-base").each(function(){
+            var id = $(this).data('id');
+            var height = $(this).height();
+            $(".task-item-wrapper-" + id).each(function(){
+                $(this).height(height);
+            });
+        });
+    </script>
+
+
+{% endblock %}

@@ -1,0 +1,72 @@
+parameters:
+    ziprecruiter.api_key: value
+    indeed.publisher_id: 168175144296822
+    upload_dir: '%kernel.root_dir%/../web/uploads/files'
+    noreply_email: noreply@findmyprofession.com 
+    admin_email: help@findmyprofession.com
+    help_email: help@findmyprofession.com
+    #help_email: itstestingemailforfmp@mailinator.com
+    chat_email: noreply@findmyprofession.com
+    sitemap_dir: '%kernel.root_dir%/../../fmp_front/dist/'
+
+services:
+    zip.recruiter:
+        class: RestBundle\Services\ZipRecruiter
+        arguments: ['%ziprecruiter.api_key%']
+
+    indeed:
+        class: RestBundle\Services\Indeed
+        arguments: ['%indeed.publisher_id%']
+
+    app.file_uploader:
+        class: RestBundle\Services\FileUploader
+        arguments: ['%upload_dir%']
+
+    app.exception_listener:
+        class: RestBundle\EventListener\ExceptionListener
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
+
+    app.form_errors:
+        class: RestBundle\Services\FormErrorsHandler
+        arguments: ['@translator']
+
+    app.transformer:
+          class: RestBundle\Services\DataTransform
+          arguments: ['@doctrine.orm.entity_manager']
+
+    app.user.listener:
+        class: RestBundle\EventListener\UserListener
+        arguments: ['@security.password_encoder']
+        tags:
+            - { name: doctrine.event_listener, event: preUpdate }
+            - { name: doctrine.event_listener, event: prePersist }
+
+    image.link:
+        class: RestBundle\Services\ImageLink
+        arguments:
+            - "@vich_uploader.templating.helper.uploader_helper"
+            - "@router"
+
+    link.serializer:
+        class: RestBundle\Listener\LinkSerializeListener
+        arguments: ["@image.link"]
+        tags:
+            - { name: jms_serializer.event_subscriber }
+
+    imap.mailbox:
+        class: RestBundle\Services\ImapService
+        arguments: ['@service_container']
+
+    mailchimp.notification:
+        class: RestBundle\Services\MailChimpNotification
+        arguments:
+            - "@=container.getParameter('mailchimp_apikey')"
+
+    user.mailer:
+        class: RestBundle\Services\UserMailer
+        arguments: ['@templating', '@mailer', '%noreply_email%', '%admin_email%']
+
+    sitemap.generator:
+        class: RestBundle\Services\SitemapGenerator
+        arguments: ['@doctrine.orm.entity_manager', '%sitemap_dir%']

@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Add/Edit discount{% endblock %}
+{% block sub_small_title %}{% endblock %}
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-credit-card"></i> Discount</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                {{ form_start(form) }}
+                <div class="box-body">
+                    <div class="form-group col-sm-6">
+                        <div>{{ form_row(form.code) }}</div>
+                        <div>{{ form_row(form.count) }}</div>
+                        <div>{{ form_row(form.type) }}</div>
+                        <div>{{ form_row(form.value) }}</div>
+                    </div>
+                    <div class="form-group col-sm-6">
+                        {{ form_label(form.services) }}
+                        <div class="clearfix"></div>
+                        {% for type in form.services %}
+                        <div class="col-sm-12">
+                            {{ form_errors(type) }}
+                            {% if type.vars.checked == true %}
+                                {{ form_widget(type, {'attr': {'checked': true}}) }}
+                            {% else %}
+                                {{ form_widget(type, {'attr': {'checked': false}}) }}
+                            {% endif %}
+                            <span>{{ type.vars.label }}</span>
+                        </div>
+                        {% endfor %}
+                        <div>{{ form_row(form.dateFrom) }}</div>
+                        <div>{{ form_row(form.dateUndo) }}</div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    {{ form_widget(form.submit) }}
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

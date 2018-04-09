@@ -1,0 +1,10 @@
+{
+  "name": "Find My Profession",
+  "version": "1.0.0",
+  "description": "The API documentation of Find My Profession",
+  "title": "Find My Profession API Documentation",
+  "template" : {
+    "withCompare" : true,
+    "withGenerator": true
+  }
+}

@@ -1,0 +1,38 @@
+RestBundle\Entity\Message:
+    exclusion_policy: ALL
+    properties:
+        id:
+            expose: true
+            groups: ['api', 'chat']
+
+        author:
+            expose: true
+            groups: ['api']
+ 
+        message:
+            expose: true
+            groups: ['api', 'chat']
+
+        attachment:
+            expose: true
+            groups: ['api', 'chat']
+
+        edited:
+            expose: true
+            groups: ['api', 'chat']
+ 
+        sendername:
+            expose: true
+            groups: ['api', 'chat']
+        adminmessage:
+            expose: true
+            groups: ['api', 'chat']
+        date:
+            expose: true
+            groups: ['api']
+
+    virtual_properties:
+        getUsername:
+            expose: true
+            serialized_name: full_name
+            groups: ['api']

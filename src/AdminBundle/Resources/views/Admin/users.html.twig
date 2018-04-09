@@ -1,0 +1,219 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Users{% endblock %}
+{% block sub_small_title %}List of all users{% endblock %}
+
+{% block stylesheets %} 
+    <link rel="stylesheet" href="{{ asset('bundles/multiselect/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/component.css') }}"> 
+    <link rel="stylesheet" href="{{ asset('bundles/multiselect/bootstrap-multiselect.css') }}">
+
+    <style>
+        .multiselect-container{
+            max-height: 120px;
+            overflow-y: auto;
+        }
+    </style>
+{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-user"></i> Users</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box">
+            <ul class="nav nav-tabs pull-right">
+                <li><a href="{{path('list_users_filter', {'filter': "active"})}}" {% if filter_val =="active" %} class="userfilter_select" {% endif %}>Active</a></li>
+                <li><a href="{{path('list_users_filter', {'filter': "complete"})}}" {% if filter_val =="complete" %} class="userfilter_select" {% endif %}>Completed</a></li>
+            </ul>
+                <div class="box-body">
+            {% if users[0] is defined %}
+                <table class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        {% if not app.user.isSuperAdmin %}
+                            <th class="col-md-2">Name</th>
+                            <th class="col-md-5">Services</th>
+                            <th class="col-md-1">Last Active User</th>
+                            <th class="col-md-1">Last Active Admin</th>
+                            <th class="col-md-2">Order Date</th>
+                            <th class="col-md-1">Price</th>
+                        {% else %}
+                            <th class="col-md-2">Name</th>
+                            <th class="col-md-2">Services</th>
+                            <th class="col-md-1">Last Active User</th>
+                            <th class="col-md-1">Last Active Admin</th>
+                            <th class="col-md-1">Order Date</th>
+                            <th class="col-md-1">Price</th>
+                            <th class="col-md-2">Account Executive</th>
+                            <th class="col-md-2">SDR</th>
+                            <th class="col-md-1">Action</th>
+                        {% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                        {% set price = 0 %}
+                        <tr>
+                            <td><a href="{{ path('view_user', {'user': user.id}) }}">{{ user.fullName }}</a></td>
+                            <td>
+                                {% set num_packages = user.packages | length %}
+
+                                {% if num_packages != 0 %}
+                                    {% if num_packages > 1 %}
+                                        {% set packages = [] %}
+
+                                        {% for package in user.packages %}
+                                            {% set packages = packages|merge([package.service.name]) %}
+                                        {% endfor %}
+
+                                        {% if user.packages.last.discount %}
+                                            {% set price = price + user.packages.last.discount %}
+                                        {% else %}
+                                            {% set price = price + user.packages.last.price %}
+                                        {% endif %}
+
+                                        {{ packages | join(', ') }}
+                                    {% else %}
+                                        {{ user.packages.last.service.name }}
+                                        {% if user.packages.last.discount %}
+                                            {% set price = price + user.packages.last.discount %}
+                                        {% else %}
+                                            {% set price = price + user.packages.last.price %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% else %}
+                                    No services
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{user.LastActiveDays}}
+                            </td>
+                            <td>
+                                {{user.AdminLastActiveDays}}
+                            </td>
+                            <td>
+                                {{user.DateCreated | date("Y-m-d")}}
+                            </td>
+                            <td>
+                                $ {{price}}
+                            </td>
+                            {% if app.user.isSuperAdmin %}
+                                <td>
+                                    <select class="form-control change-user-admin" data-id="{{ user.id }}">
+                                        <option value="0">None Selected</option>
+                                        {% for admin in admins %}
+                                            <option value="{{ admin.id }}" {% if user.admins.contains( admin ) %} selected {% endif %}>{{ admin.fullName }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-control change-user-sdr" data-id="{{ user.id }}">
+                                        <option value="0">None Selected</option>
+                                        {% for sdr in sdrs %}
+                                            <option value="{{ sdr.id }}" {% if user.admins.contains( sdr ) %} selected {% endif %}>{{ sdr.fullName }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="text-center">
+                                    <a class="btn btn-danger btn-sm" href="{{path('delete_user', {'user': user.id})}}"><i class="fa fa-trash"></i></a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                         
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <input type="hidden" id="user_id_val">
+            {% else %}
+                No users assigned to you.
+            {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+{% endblock %}
+
+{% block javascripts %}
+
+<script src="{{ asset('bundles/multiselect/bootstrap-multiselect.js') }}"></script>
+    <script>
+        $(document).on('change', '.change-user-admin', function() {
+            var admin = $(this).val();
+            var user = $(this).data('id');
+
+            $.ajax({
+                url :  "{{ path('admin_user_assign_to_admin') }}",
+                type: "POST",
+                data: {
+                    user    : user,
+                    admin   : admin,
+                    role    : 'ROLE_ADMIN'
+                },
+                success: function(data) {
+                    getSuccessNoty('User was assigned to admin successfully');
+                }
+            }); 
+        });
+
+        $(document).on('change', '.change-user-sdr', function () {
+            var sdr = $(this).val();
+            var user = $(this).data('id');
+
+            $.ajax({
+                url : "{{ path('admin_user_assign_to_admin') }}",
+                type: "POST",
+                data: {
+                    user    : user,
+                    admin   : sdr,
+                    role    : 'ROLE_SDR'
+                },
+                success: function (data) {
+                    getSuccessNoty('User was assigned to SDR successfully')
+                }
+            });
+
+        });
+
+        var modal = document.getElementById('myModal');
+
+        function open_dialog( userid ){
+            modal.style.display = "block";
+            $("#user_id_val").attr("value", userid);
+            $("#cur_password").val("");
+            $("#new_password").val("");
+        }
+
+        $('.close').on("click",function(){
+            modal.style.display = "none";
+        });
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        $("#save_password").click(function(){
+            $.ajax({
+                url:  "{{ path('update_user_password') }}" ,
+                type: "POST",
+                data: {user: $("#user_id_val").val(), password: $("#new_password").val(), old_password: $("#cur_password").val() },
+                success:function(data) {
+                    modal.style.display = "none";
+                    getSuccessNoty('User Password was changed successfully');
+                },
+                error: function (textStatus, errorThrown) {
+                    modal.style.display = "none";
+                    getErrorNoty('User Password is not verify');
+                }
+            });
+        
+        });
+
+    </script>
+{% endblock %}

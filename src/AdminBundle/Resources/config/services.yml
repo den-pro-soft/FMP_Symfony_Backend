@@ -1,0 +1,4 @@
+services:
+    admin_authenticator:
+        class:     AdminBundle\Security\AdminAuthenticator
+        arguments: ["@security.password_encoder", "@doctrine.orm.entity_manager", "@request_stack"]

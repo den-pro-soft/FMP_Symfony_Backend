@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Services{% endblock %}
+{% block sub_small_title %}List of all services{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-money"></i> Service</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+    <div class="box">
+        <div class="box-body">
+            <table class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for service in services %}
+                    <tr>
+                        <td><a href="{{ path('edit_service', {'service': service.id}) }}">{{ service.name }}</a></td>
+                        <td>{{ service.description }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </div>
+        </div>
+    </div>
+{% endblock %}

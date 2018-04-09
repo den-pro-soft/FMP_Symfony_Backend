@@ -1,0 +1,94 @@
+RestBundle\Entity\Profile:
+    exclusion_policy: ALL
+    properties:
+        postal_code:
+            expose: true
+            groups: ['profile']
+
+        state:
+            expose: true
+            groups: ['profile']
+
+        city:
+            expose: true
+            groups: ['profile']
+
+        street_address:
+            expose: true
+            groups: ['profile']
+
+        post_date:
+            expose: true
+            groups: ['profile']
+
+        phone_number:
+            expose: true
+            groups: ['profile']
+
+        linkedin_url:
+            expose: true
+            groups: ['profile']
+
+        birth_date:
+            expose: true
+            groups: ['profile']
+
+        documents:
+            expose: true
+            groups: ['profile']
+
+        templates:
+            expose: true
+            groups: ['profile']
+
+        education:
+            expose: true
+            groups: ['profile']
+
+        work_experience:
+            expose: true
+            groups: ['profile']
+
+        career_preferences:
+            expose: true
+            groups: ['profile']
+
+        user_reference:
+            expose: true
+            groups: ['profile']
+
+        questions:
+            expose: true
+            groups: ['profile']
+
+        new_gmail_email:
+            expose: true
+            groups: ['profile']
+
+        new_gmail_password:
+            expose: true
+            groups: ['profile']
+
+        linkedin_email:
+            expose: true
+            groups: ['profile']
+
+        linkedin_password:
+            expose: true
+            groups: ['profile']
+
+    virtual_properties:
+        getProgress:
+            expose: true
+            serialized_name: progress
+            groups: ['profile']
+
+        getFullName:
+            expose: true
+            serialized_name: full_name
+            groups: ['profile']
+
+        getEmail:
+            expose: true
+            serialized_name: email
+            groups: ['profile']

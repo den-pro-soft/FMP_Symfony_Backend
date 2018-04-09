@@ -1,0 +1,5 @@
+table creation
+php bin/console generate:doctrine:entity
+
+database update with entity
+php bin/console doctrine:schema:update --force

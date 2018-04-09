@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Add/Edit admin{% endblock %}
+{% block sub_small_title %}{% endblock %}
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-user"></i> Admin</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <form name="admin_bundle_admin_type" method="post">
+                    <div class="box-body">
+                        <div class="form-group col-sm-6">
+                            <div>
+                                <div>
+                                    <label for="admin_bundle_full_name" class="required">Full Name</label>
+                                    <input type="text" id="admin_bundle_full_name" name="admin_bundle[full_name]" required="required" class="form-control" {% if is_edit %} value="{{ admin.fullName }}" {% endif %}>
+                                </div>
+                            </div>
+                            <div>
+                                <div>
+                                    <label for="admin_bundle_email" class="required">Email</label>
+                                    <input type="email" id="admin_bundle_email" name="admin_bundle[email]" required="required" class="form-control" {% if is_edit %} value="{{ admin.email }}" {% endif %}>
+                                </div>
+                            </div>
+                            {% if is_edit == false %}
+                                <div>
+                                    <div>
+                                        <label for="admin_bundle_password_first">Password</label>
+                                        <input type="password" id="admin_bundle_password_first" name="admin_bundle[password][first]" class="form-control">
+                                    </div>
+                                    <div>
+                                        <label for="admin_bundle_password_second">Repeat Password</label>
+                                        <input type="password" id="admin_bundle_password_second" name="admin_bundle[password][second]" class="form-control">
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <div>
+                                <label for="admin_bundle_role" class="required">Role</label>
+                                <select id="admin_bundle_role" name="admin_bundle[role]" class="form-control" {% if is_edit and admin.isSuperAdmin %} disabled {% endif %}>
+                                    {% if is_edit and admin.isSuperAdmin %}<option value="ROLE_SUPER_ADMIN" selected>Super Admin</option>{% endif %}
+                                    <option value="ROLE_ADMIN_MANAGER" {% if is_edit and admin.role == 'ROLE_ADMIN_MANAGER' %}selected{% endif %}>Manager</option>
+                                    <option value="ROLE_ADMIN" {% if is_edit and admin.role == 'ROLE_ADMIN' %}selected{% endif %}>Account Executive</option>
+                                    <option value="ROLE_SDR" {% if is_edit and admin.role == 'ROLE_SDR' %}selected{% endif %}>SDR</option>
+                                    <option value="ROLE_MANAGER_BLOG" {% if is_edit and admin.role == 'ROLE_MANAGER_BLOG' %}selected{% endif %}>Blog Manager</option>
+                                </select>
+                            </div>
+                            <div id="admin_manager_list" {% if is_edit and (admin.role == 'ROLE_ADMIN' or admin.role == 'ROLE_SDR') %} style="display: block;" {% else %} style="display: none;" {% endif %}>
+                                <label for="admin_bundle_manager">Admin Manager</label>
+                                <select id="admin_bundle_manager" name="admin_bundle[manager]" class="form-control">
+                                    {% for manager in managers %}
+                                    <option value="{{ manager.id }}" {% if is_edit and admin.admins.contains(manager) %} selected {% endif %}>{{ manager.fullName }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <div>
+                                <label for="admin_bundle_title" class="required">Title</label>
+                                <select id="admin_bundle_title" name="admin_bundle[title]" class="form-control">
+                                    <option value="Account Manager" {% if is_edit and admin.title == 'Account Manager' %} selected {% endif %}>Account Manager</option>
+                                    <option value="Account Executive" {% if is_edit and admin.title == 'Account Executive' %} selected {% endif %}>Account Executive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <button type="submit" id="admin_bundle_submit" name="admin_bundle[submit]" class="btn btn-primary center-block">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(document).on('change', '#admin_bundle_role', function () {
+            var role = $(this).val();
+            if(role === 'ROLE_ADMIN' || role === 'ROLE_SDR'){
+                $('#admin_manager_list').fadeIn();
+            } else {
+                $('#admin_manager_list').fadeOut();
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Discounts{% endblock %}
+{% block sub_small_title %}List of all discounts{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-credit-card"></i> Discounts</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-body">
+                    <div class="col-xs-4">
+                        <a href="{{ path('add_discount') }}" class="btn btn-success"><i class="fa fa-plus"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-body">
+                    {% if discounts[0] is defined %}
+                    <table id="example1" class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Type</th>
+                            <th>Services</th>
+                            <th>Num usage</th>
+                            <th>Value</th>
+                            <th>Date From</th>
+                            <th>Date Undo</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for discount in discounts %}
+                            {% if discount.services | length != 5 and discount.services[0] is defined %}
+                                {% if discount.services | length > 1 %}
+                                    {% set service = [] %}
+                                    {% for d in discount.services %}
+                                        {% set service = service|merge([d.name]) %}
+                                    {% endfor %}
+                                    {% set services = service | join(', ') %}
+                                {% else %}
+                                    {% set services = discount.services[0].name %}
+                                {% endif %}
+                            {% else %}
+                                {% set services = 'All services' %}
+                            {% endif %}
+                            <tr>
+                                <td><a href="{{ path('edit_discount', {'discount': discount.id}) }}">{{ discount.code }}</a></td>
+                                <td>{{ discount.type }}</td>
+                                <td>{{ services }}</td>
+                                <td>{{ discount.count }}</td>
+                                <td>{{ discount.value }}</td>
+                                <td>{{ discount.dateFrom | date("m/d/Y") }}</td>
+                                <td>{{ discount.dateUndo | date("m/d/Y") }}</td>
+                                <td>
+                                    <a class="btn btn-danger btn-sm" href="{{ path('delete_discount', {'discount': discount.id}) }}"><i class="fa fa-trash"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                        There is no discounts.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

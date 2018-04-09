@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>{% block title %}FMP Admin | Dashboard{% endblock %}</title>
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+        <link rel="stylesheet" href="{{ asset('bundles/admin/css/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('bundles/admin/css/font-awesome.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('bundles/admin/css/ionicons.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('bundles/admin/css/AdminLTE.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('bundles/admin/css/custom.css') }}">
+        <!-- Ionicons -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+        {% block stylesheets %}{% endblock %}
+        <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/noty/lib/noty.css') }}">
+        <link rel="stylesheet" href="{{ asset("bundles/admin/plugins/datatables/dataTables.bootstrap.css") }}">
+        <link rel="stylesheet" href="{{ asset('bundles/admin/css/_all-skins.min.css') }}">
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+        <link rel="icon" type="image/vnd.microsoft.icon" href="{{asset('favicon_32.png')}}">
+        <link rel="apple-touch-icon" href="{{asset('favicon_152.png')}}">
+    </head>
+    {% block body %}
+    <body class="hold-transition skin-blue sidebar-mini fixed">
+    <div class="wrapper">
+        <header class="main-header">
+            <a href="{{ path('dashboard') }}" class="logo">
+                <span class="logo-mini"><b>F</b>MP</span>
+                <span class="logo-lg"><b>Find</b> My Profession</span>
+            </a>
+
+            <nav class="navbar navbar-static-top" role="navigation">
+                <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                    <span class="sr-only">Toggle navigation</span>
+                </a>
+                <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        <li class="dropdown messages-menu">
+                            <a href="#" class="dropdown-toggle counter" data-toggle="dropdown">
+                                <i class="fa fa-envelope-o"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header counter-header">You have 0 messages</li>
+                                <li>
+                                    <!-- inner menu: contains the actual data -->
+                                    <ul class="menu counter-body">
+                                        <li><!-- start message -->
+                                        </li>
+                                        <!-- end message -->
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="dropdown notifications-menu">
+                            <a href="#" class="dropdown-toggle job-counter" data-toggle="dropdown">
+                                <i class="fa fa-bell-o"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header job-counter-header">You have 0 notifications</li>
+                                <li>
+                                    <!-- inner menu: contains the actual data -->
+                                    <ul class="menu job-counter-body">
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="dropdown user user-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <span class="hidden-xs">{{ app.user.fullName }}</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="user-footer">
+                                    <div class="pull-left">
+                                    <a href="{{ path('settings') }}" class="btn btn-default btn-flat">Change Password</a>
+                                    </div>
+                                    <div class="pull-right">
+                                        <a href="{{ path('logout') }}" class="btn btn-danger btn-flat">Sign out</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <aside class="main-sidebar">
+            <section class="sidebar">
+                {% include '@Admin/Admin/side_bar.html.twig' %}
+            </section>
+        </aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                {% block header %}
+                    <h1>
+                        {% block sub_title %}Admin management{% endblock %}
+                        <small>{% block sub_small_title %}List of admins{% endblock %}</small>
+                    </h1>
+                    <ol class="breadcrumb">
+                        <li class="active"><a href="{{ path('dashboard') }}"><i class="fa fa-users"></i> {% if app.user.isSuperAdmin %}Admin management{% else %}Users{% endif %}</a></li>
+                        {% block breadcrumb %}{% endblock %}
+                    </ol>
+                {% endblock %}
+            </section>
+
+            <section class="content">
+                {% block content %}
+                {% endblock %}
+            </section>
+        </div>
+    </div>
+    {% endblock %}
+    <script src="{{ asset('bundles/admin/js/jQuery-2.1.4.min.js') }}"></script>
+    <script src="{{ asset('bundles/multiselect/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('bundles/admin/plugins/fastclick/fastclick.min.js') }}"></script>
+    <script src="{{ asset('bundles/admin/plugins/slimScroll/jquery.slimscroll.min.js') }}"></script>
+    <script src="{{ asset('bundles/admin/plugins/noty/lib/noty.js') }}"></script>
+    <script src="{{ asset('bundles/admin/js/notify.js') }}"></script>
+    <script src="{{ asset("bundles/admin/plugins/datatables/jquery.dataTables.min.js") }}"></script>
+    <script src="{{ asset("bundles/admin/plugins/datatables/dataTables.bootstrap.min.js") }}"></script>
+    <script>
+       
+        {% for flash_message in app.session.flashBag.get('error') %}
+            getErrorNoty('{{flash_message}}');
+        {% endfor %}
+
+        {% for flash_message in app.session.flashBag.get('success') %}
+            getSuccessNoty('{{flash_message}}');
+        {% endfor %}
+    </script>
+        {% if app.user.token is defined %}
+    <script>
+            (function worker() {
+                $.ajax({
+                    url: '{{ path('admin_message_get_count') }}',
+                    success: function (resp) {
+                        if (resp.length !== 0) {
+                            var data = JSON.parse(resp);
+                            if (Object.keys(data).length !== 0) {
+                                $('.counter').html('<i class="fa fa-envelope-o"></i>' +
+                                    '<span class="label label-success">' + Object.keys(data).length + '</span>');
+
+                                $('.counter-header').html('You have ' + Object.keys(data).length + ' messages');
+                                var html = '';
+
+                                Object.keys(data).map(function (userId) {
+                                    var url = "{{path('view_user', {'user': 'user_id'})}}";
+                                    var url = url.replace('user_id', userId)
+                                    html += '<li><a href=' + url + '><h4>' + data[userId][0].full_name + '</h4><p><span class="badge">' + data[userId].length + ' messages</span></p></a></li>';
+                                });
+
+                                $('.counter-body').html(html);
+                            }
+                        }
+                    },
+                    complete: function () {
+                        setTimeout(worker, 5000);
+                    }
+                });
+            })();
+
+            (function job_worker() {
+                $.ajax({
+                    url: '{{ path('admin_job_status_check') }}',
+                    success: function (resp) {
+                        if (resp.length !== 0) {
+                            var data = JSON.parse(resp);
+                            if (Object.keys(data).length !== 0) {
+                                var html = '';
+                                Object.keys(data).map(function (userId) {
+                                  var url = "{{path('user_jobs', {'user': 'user_id'})}}";
+                                  var url = url.replace('user_id', userId)
+                                  html += '<li><a href=' + url + '><h4>' + data[userId][0].username + '</h4><p><span class="badge">' + data[userId].length + ' jobs</span></p></a></li>';
+                                });
+
+                                $('.job-counter-body').html(html);
+                                $('.job-counter').html('<i class="fa fa-bell-o"></i>' +
+                                    '<span class="label label-warning">' +  Object.keys(data).length + '</span>');
+
+                                $('.job-counter-header').html('You have ' + Object.keys(data).length + ' jobs');
+                            }
+                        }
+                    },
+                    complete: function () {
+                        setTimeout(job_worker, 5000);
+                    }
+                });
+            })();
+    </script>
+        {% endif %}
+    {% block javascripts %}{% endblock %}
+    <script src="{{ asset('bundles/admin/js/app.min.js') }}"></script>
+    <script src="{{ asset('bundles/admin/js/demo.js') }}"></script>
+    </body>
+</html>

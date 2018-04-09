@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Content editor{% endblock %}
+{% block sub_small_title %}{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-file"></i> Congratulation message</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                {{ form_start(form) }}
+                <div class="box-body">
+                    <div class="form-group">
+                        <div class="col-sm-12">{{ form_row(form.congratulationMessage) }}</div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    {{ form_widget(form.submit) }}
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

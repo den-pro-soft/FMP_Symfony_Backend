@@ -1,0 +1,167 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <style>
+        .box-body {
+            margin-top: 20px;
+        }
+        label, input {
+            display: block;
+        }
+        .resume-field {
+            margin-bottom: 15px;
+        }
+        .image-preview {
+            margin: 10px auto;
+            padding: 4px;
+            line-height: 1.6;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 0;
+            transition: all .2s ease-in-out;
+            height: auto;
+            cursor: pointer;
+            width: 100px;
+            display: block;
+        }
+
+        .pdf-preview {
+            display: block;
+            margin: 10px auto;
+        }
+
+        .pdf-preview.none-pdf {
+            opacity: 0.3;
+        }
+
+        .file-input {
+            width: 115px;
+            color: transparent;
+            background: #dddddd;
+            cursor: pointer;
+            margin: auto;
+        }
+
+    </style>
+{% endblock %}
+
+{% block header %}
+    <h1>
+        Resume Sample Editor
+        <small></small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="{{ path('view_list_pages') }}"><i class="fa fa-users"></i> Pages</a></li>
+        <li><a href="{{ path('view_resume_samples') }}"><i class="fa fa-book"></i> Resume Samples</a></li>
+        <li class="active"><i class="fa fa-file"></i> {% if is_edit %} Edit {% else %} Add {% endif %}</li>
+    </ol>
+{% endblock %}
+
+{% block content %}
+    <div class="custom-content">
+        <div class="box box-primary">
+            <form method="post" name="admin_bundle_resume_sample_type">
+                <div class="box-body">
+                    <div class="form-group col-md-12">
+                        <div class="col-md-5 col-xs-12">
+                            <div class="resume-field">
+                                <label for="title" class="required">Title:</label>
+                                <input type="text" id="title" class="form-control" name="resume[title]" {% if is_edit %} value="{{ sample.title }}" {% endif %}>
+                            </div>
+                            <div class="resume-field">
+                                <label for="category" class="required">Category:</label>
+                                <select id="category" class="form-control" name="resume[category]">
+                                    <option value="senior" {% if is_edit and sample.category == 'senior' %} selected {% endif %}>Senior & Executive Resume Samples</option>
+                                    <option value="entry" {% if is_edit and sample.category == 'entry' %} selected {% endif %}>Entry & Mid Resume Samples</option>
+                                </select>
+                            </div>
+                            <div class="resume-field">
+                                <label for="status" class="required">Status:</label>
+                                <select id="status" class="form-control" name="resume[status]">
+                                    <option value="Publish" {% if is_edit and sample.status == 'Publish' %} selected {% endif %}>Publish</option>
+                                    <option value="Draft" {% if is_edit and sample.status == 'Draft' %} selected {% endif %}>Draft</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-1"></div>
+                        <div class="col-md-2 text-center">
+                            <label>Featured Image:</label>
+                            <div style="width: 105px; margin: auto;">
+                                <label for="image">
+                                    <img id="image_preview" class="image-preview" {% if is_edit %} src="{{ vich_uploader_asset(sample, 'image') }}" {% else %} src="{{ asset('bundles/admin/images/img-placeholder.png') }}" {% endif %}>
+                                </label>
+                            </div>
+                            <input type="file" id="image" name="resume[image]" class="form-control file-input" accept="image/*" data-origin="{{ vich_uploader_asset(sample, 'image') }}">
+                        </div>
+                        <div class="col-md-1"></div>
+                        <div class="col-md-2 text-center">
+                            <label>Document(PDF File):</label>
+                            <div style="margin: 10px auto;">
+                                <img class="pdf-preview {% if is_edit %}{% else %} none-pdf {% endif %}" src="{{ asset('bundles/admin/images/pdf-icon.png') }}" width="70">
+                                <span class="pdf-name">{% if is_edit %}{{ sample.getPdfName }}{% else %}N/A{% endif %}</span>
+                            </div>
+                            <input type="file" id="pdf" name="resume[pdf]" class="form-control file-input" accept="application/pdf" data-origin="{% if is_edit %}{{ sample.getPdfName }}{% else %}N/A{% endif %}">
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <button type="submit" id="submit" name="submit" class="btn btn-primary center-block">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function readURL(input, $img) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $img.attr('src', e.target.result);
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+
+        }
+        $(document).on('ready', function() {
+            $('#pdf').change(function (e) {
+                var file = e.target.files[0];
+
+                if(typeof file === 'undefined')
+                {
+                    var origin = $(this).data('origin');
+                    $('.pdf-name').html(origin);
+                } else {
+                    $('.pdf-name').html(file.name);
+                }
+
+                if($('.pdf-name').html() == 'N/A'){
+                    $('.pdf-preview').addClass('none-pdf');
+                } else {
+                    $('.pdf-preview').removeClass('none-pdf');
+                }
+            });
+
+            $('#image').change(function (e) {
+                e.preventDefault();
+                var file = e.target.files[0];
+
+                if(typeof file === 'undefined')
+                {
+                    var origin = $(this).data('origin');
+                    $('#image_preview').attr('src', origin);
+                } else {
+                    if(file.type.indexOf('image/') !== 0){
+                        alert('Invalid File Format');
+                    } else {
+                        readURL(this, $('#image_preview'));
+                    }
+                }
+            });
+        })
+    </script>
+{% endblock %}

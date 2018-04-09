@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}View/Edit tops{% endblock %}
+{% block sub_small_title %}{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-bar-chart"></i> Top Blog</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                {{ form_start(form) }}
+                <div class="box-header">
+                    <div class="box-title"> <label>Top {{ category }} blogs</label></div>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <div class="col-sm-6">{{ form_row(form.first) }}</div>
+                        <div class="col-sm-6">{{ form_row(form.second) }}</div>
+                        <div class="col-sm-6">{{ form_row(form.third) }}</div>
+                        <div class="col-sm-6">{{ form_row(form.fourth) }}</div>
+                        <div class="col-sm-6">{{ form_row(form.fifth) }}</div>
+                        <div class="col-sm-6">{{ form_row(form.sixth) }}</div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    {{ form_widget(form.submit) }}
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

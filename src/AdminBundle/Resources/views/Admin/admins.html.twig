@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-body">
+                    <div class="col-xs-4">
+                        <a href="{{ path('add_admins') }}" class="btn btn-success"><i class="fa fa-plus"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-body">
+                    <table id="example1" class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Full name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Assigned users</th>
+                            <th>Title</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for admin in admins %}
+                            <tr>
+                                <td>{{ admin.fullName }}</td>
+                                <td><a href="{{ path('view_admin', {'admin': admin.id}) }}">{{ admin.email }}</a></td>
+                                <td>
+                                    {% if admin.isSuperAdmin %}
+                                        Super Admin
+                                    {% elseif admin.role == 'ROLE_ADMIN_MANAGER' %}
+                                        Manager
+                                    {% elseif admin.role == 'ROLE_MANAGER_BLOG' %}
+                                        Blog Manager
+                                    {% elseif admin.isSDR %}
+                                        SDR
+                                    {% else %}
+                                        Account Executive
+                                    {% endif %}</td>
+                                <td>{{ admin.users | length }}</td>
+                                <td>
+                                    <select id="{{ admin.id }}" class="form-control change-user-title">
+                                        <option value="Account Manager" {% if admin.title == "Account Manager" %} selected {% endif %}>Account Manager</option>
+                                        <option value="Account Executive" {% if admin.title == "Account Executive" %} selected {% endif %}>Account Executive</option>
+                                    </select>
+                                </td>
+                                <td class="text-center">{% if not admin.isSuperAdmin %}<a class="btn btn-danger btn-sm" href="{{ path('delete_admin', {'admin': admin.id}) }}"><i class="fa fa-trash"></i></a>{% endif %}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(document).on('change', '.change-user-title', function() {
+
+            var admin_id  = $(this).attr('id');
+            var title_val = $(this).val();
+
+            $.ajax({
+                url:  "{{ path('admin_title_change') }}",
+                type: "POST",
+                data: {title: title_val, admin: admin_id},
+                success:function(data) {
+                    getSuccessNoty('User was assigned successfully');
+                }
+            });
+        });
+    </script>
+{% endblock %}

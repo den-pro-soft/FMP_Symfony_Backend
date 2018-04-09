@@ -1,0 +1,1180 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}{{ user.fullName }} Jobs{% endblock %}
+{% block sub_small_title %}{% endblock %}
+
+{% block breadcrumb %}
+    <li><a href="{{ path('view_user', {'user': user.id}) }}"><i class="fa fa-list"></i> User</a></li>
+    <li class="active"><i class="fa fa-briefcase"></i> Jobs</li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/normalize.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/component.css') }}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ asset('bundles/admin/css/custom_modal.css') }}">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <style>
+        .inputfile {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+
+        .post {
+            position: relative;
+        }
+
+        .delete-job {
+            margin-left: 30px;
+            cursor: pointer;
+        }
+
+        .job-detail-wrapper {
+            text-align: right;
+            margin: 10px 5px;
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        {% for flash_message in app.session.flashBag.get('error') %}
+            <div class="alert alert-danger form-group">{{ flash_message }}</div>
+        {% endfor %}
+        <div class="col-md-12">
+            <a class="btn btn-primary" href="{{ path('view_user', {'user': user.id}) }}">Profile</a>
+        </div>
+        <hr>
+        <div class="col-md-12">
+            <div class="nav-tabs-custom panel box box-primary">
+                <ul class="nav nav-tabs pull-right">
+                    <li><a href="#tab_2-2" data-toggle="tab" id="applied_job_count">Applied ({{jobs_applied|length}})</a></li>
+                    <li class="active"><a href="#tab_1-1" data-toggle="tab" id="liked_job_count">Liked ({{jobs_liked|length}})</a></li>
+                    <li><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-default">Add Job</button></li>
+                    <li class="pull-left header"><i class="fa fa-check-square-o"></i> Jobs</li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab_1-1">
+                        <div class="col-xs-offset-4 col-xs-4 col-xs-offset-4 text-center">
+                            <select class="form-control job-like-filter">
+                                <option value="">All</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Ready">Ready</option>
+                                <option value="Need Info">Need Info</option>
+                                {# <option value="Expired">Expired</option>
+                                <option value="No Interest">No Interest</option> #}
+                            </select>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="liked-jobs-div">
+                        {% for job in jobs_liked %}
+                            <div class="post" data-sort="{{ job.date | date("M d,Y") }}">
+                                <div class="row">
+                                    <div class="user-block col-md-5 col-xs-6">
+                                        <span class="edit-job-span" data-toggle="modal" data-target="#editjob-modal"
+                                              contactuid="{{ job.id }}" contacturl="{{ job.link }}" contactcompany="{{ job.company }}" contacttitle="{{ job.position }}" contactnote="{{ job.jobdescription }}">
+                                            <svg>
+                                                <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#edit') }}"></use>
+                                            </svg>
+                                        </span>
+                                        <a href="{{ job.link }}" target="_blank">
+                                            {% set counter = 0 %}
+                                            {% set company_url = job.link|split('://') %}
+                                            {% for logo_url in company_url %}
+                                                {% set company_items = logo_url|split('/') %}
+                                                {% for logo_img_url in company_items %}
+                                                    {% set counter = counter + 1 %}
+                                                    {% if counter == 2 %}
+                                                        <img class="img-circle img-bordered-sm" onError="this.onerror=null;this.src='//logo.clearbit.com/https://www.findmyprofession.com/';" src="//logo.clearbit.com/{{ logo_img_url }}" alt="user image">
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endfor %}
+                                            <span class="username">{{ job.position }}</span>
+                                            <span class="description">{{ job.company }}</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-2 col-xs-6 upload-section upload_file_attach_part">
+                                        <div class="userjob-attach-file">
+                                            <div style="width: 100%;"><span class="job-notes" data-job="{{ job.id }}">Notes {% if job.jobdescription|length %}!!!{% endif %}</span></div>
+                                            <div style="width: 100%;"><span class="show-contacts" data-job="{{ job.id }}">Contacts</span></div>
+                                            <div style="width: 100%;">
+                                                {% if job.attachmentName %}
+                                                    <label style="padding: 0.625rem 1.25rem;">
+                                                        <span>
+                                                            <a href="{{ path('user_get_cover_letter', {'job': job.id}) }}">{{ job.attachmentAlias }}</a>
+                                                            <a href="#" data-id="{{ job.id }}" data-href="{{ path('user_remove_cover_letter', {'job': job.id}) }}" data-href-add="{{ path('user_add_cover_letter', {'job': job.id}) }}" class="remove-cover-letter"><i class="fa fa-close"></i></a>
+                                                        </span>
+                                                    </label>
+                                                {% else %}
+                                                    <input type="file" id="coverLatter{{ job.id }}" class="inputfile inputfile-3" accept=".pdf, .doc, .docx, .rtf, .txt, .jpg, .jpeg, .png, .svg, .ico, .gif" data-href="{{ path('user_add_cover_letter', {'job': job.id}) }}" />
+                                                    <label for="coverLatter{{ job.id }}"><span>Upload Cover Letter</span></label>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5 col-xs-12">
+                                        <div class="job-detail-wrapper">
+                                            <span class="description job-date">{% if job.addedBy == 'user' %}Client Added{% else %}FMP Added{% endif %}{% if job.addedBy != 'user' and job.section != 'liked' %}{{ job.section }}{% endif %}: {{ job.date|date('M d, Y') }}</span>
+                                            <a href="{{ path('admin_delete_job', {job: job.id}) }}">
+                                                <span class="delete-job"><i class="fa fa-times" aria-hidden="true"></i></span>
+                                            </a>
+                                        </div>
+                                        <div class="job-detail-wrapper">
+                                            <div class="col-md-4 col-xs-12">
+                                                <select id="{{ job.id }}" useriditem="{{ user.id }}" class="form-control change-job-status" data-url="{{ path('change_job_status') }}">
+                                                    <option {% if job.status == 'Pending' %} selected {% endif %} value="Pending">Pending</option>
+                                                    <option {% if job.status == 'Applied' %} selected {% endif %} value="Applied">Applied</option>
+                                                    <option {% if job.status == 'Ready' %} selected {% endif %} value="Ready">Ready</option><option {% if job.status == 'Need Info' %} selected {% endif %} value="Need Info">Need Info</option>
+                                                    <option {% if job.status == 'No Interest' %} selected {% endif %} value="No Interest">No Interest</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 col-xs-12">
+                                                <select title="How likely are you recommend this product to a friend?" id="{{ job.id }}" useriditem="{{ user.id }}" class="form-control change-job-status" data-url="{{ path('change_job_rate') }}">
+                                                    {% for i in 0..10 %}
+                                                        <option {% if job.rate == i %} selected {% endif %}>{{ i }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 col-xs-12">
+                                                <div class="description text-center">
+                                                    <label>
+                                                        <input type="checkbox" {% if job.checked %} checked {% endif %} disabled> Apply
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="empty-liked">
+                                <p align="center">First you need to add a job</p>
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="tab_2-2">
+                        <div class="col-xs-offset-4 col-xs-4 col-xs-offset-4 text-center">
+                            <select class="form-control job-apply-filter">
+                                <option value="">All</option>
+                                <option value="Applied">Applied</option>
+                                <option value="Interview">Interview</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="applied-jobs-div">
+                            {% for job in jobs_applied %}
+                                <div class="post" data-sort="{{ job.date | date("M d,Y") }}">
+                                    <div class="row">
+                                        <div class="user-block col-md-5 col-xs-6">
+                                            <span class="edit-job-span" data-toggle="modal" data-target="#editjob-modal"
+                                                    contactuid="{{ job.id }}" contacturl="{{ job.link }}" contactcompany="{{ job.company }}" contacttitle="{{ job.position }}" contactnote="{{ job.jobdescription }}">
+                                                <svg>
+                                                    <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#edit') }}"></use>
+                                                </svg>
+                                            </span>
+                                            <a href="{{ job.link }}" target="_blank">
+                                                {% set counter = 0 %}
+                                                {% set company_url = job.link|split('://') %}
+                                                {% for logo_url in company_url %}
+                                                    {% set company_items = logo_url|split('/') %}
+                                                    {% for logo_img_url in company_items %}
+                                                        {% set counter = counter + 1 %}
+                                                        {% if counter == 2 %}
+                                                            <img class="img-circle img-bordered-sm" onError="this.onerror=null;this.src='//logo.clearbit.com/https://www.findmyprofession.com/';" src="//logo.clearbit.com/{{ logo_img_url }}" alt="user image">
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endfor %}
+                                                <span class="username">{{ job.position }}</span>
+                                                <span class="description">{{ job.company }}</span>
+                                            </a>
+                                        </div>
+                                        <div class="col-md-2 col-xs-6 upload-section upload_file_attach_part">
+                                            <div class="userjob-attach-file">
+                                                <div style="width: 100%;"><span class="job-notes" data-job="{{ job.id }}">Notes {% if job.jobdescription|length %}!!!{% endif %}</span></div>
+                                                {% if job.status != 'Rejected' %}
+                                                    <div style="width: 100%;"><span class="show-contacts" data-job="{{ job.id }}">Contacts</span></div>
+                                                {% endif %}
+                                                <div style="width: 100%;">
+                                                    {% if job.attachmentName %}
+                                                        <label style="padding: 0.625rem 1.25rem;">
+                                                            <a href="{{ path('user_get_cover_letter', {'job': job.id}) }}">{{ job.attachmentAlias }}</a>
+                                                            <a href="#" data-id="{{ job.id }}" data-href="{{ path('user_remove_cover_letter', {'job': job.id}) }}" data-href-add="{{ path('user_add_cover_letter', {'job': job.id}) }}" class="remove-cover-letter"><i class="fa fa-close"></i></a>
+                                                        </label>
+                                                    {% else %}
+                                                        <input type="file" id="coverLatter{{ job.id }}" class="inputfile inputfile-3" accept=".pdf, .doc, .docx, .rtf, .txt, .jpg, .jpeg, .png" data-href="{{ path('user_add_cover_letter', {'job': job.id}) }}" />
+                                                        <label for="coverLatter{{ job.id }}"><span>Upload Cover Letter</span></label>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 col-xs-12">
+                                            <div class="job-detail-wrapper">
+                                                <span class="description job-date">{% if job.addedBy == 'admin' %}FMP{% endif %}{{ job.section|capitalize }}:
+                                                    {% if job.appliedDate %}
+                                                        {{ job.appliedDate|date("M d, Y") }}
+                                                    {% else %}
+                                                        {{ job.date|date("M d, Y") }}
+                                                    {% endif %}
+                                                </span>
+                                                <a href="{{ path('admin_delete_job', {job: job.id}) }}">
+                                                    <span class="delete-job"><i class="fa fa-times" aria-hidden="true"></i></span>
+                                                </a>
+                                            </div>
+                                            <div class="job-detail-wrapper">
+                                                <div class="col-md-4 col-xs-12">
+                                                    <select id="{{ job.id }}" useriditem="{{ user.id }}" class="form-control change-job-status" data-url="{{ path('change_job_status') }}">
+                                                        <option {% if job.status == 'Pending' %} selected {% endif %} value="Pending">Pending</option>
+                                                        <option {% if job.status == 'Applied' %} selected {% endif %} value="Applied">Applied</option>
+                                                        <option {% if job.status == 'Interview' %} selected {% endif %} value="Interview">Interview</option>
+                                                        {#<option {% if job.status == 'Offer' %} selected {% endif %} value="Offer">Offer</option>#}
+                                                        <option {% if job.status == 'Rejected' %} selected {% endif %} value="Rejected">Rejected</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4 col-xs-12">
+                                                    <select title="How likely are you recommend this product to a friend?" id="{{ 'rate' ~ job.id }}" useriditem="{{ user.id }}" class="form-control change-job-status" data-url="{{ path('change_job_rate') }}">
+                                                        {% for i in 0..10 %}
+                                                            <option {% if job.rate == i %} selected {% endif %}>{{ i }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4 col-xs-12">
+                                                    <div class="description text-center">
+                                                        <label>
+                                                            <input type="checkbox" {% if job.checked %} checked {% endif %} disabled> Yes, Apply For Me
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <p class="empty-applied" align="center">No Applied Jobs</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-default" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span></button>
+                        <h4 class="modal-title">Add Job <small>Please Add Job Detail</small></h4>
+                    </div>
+                    {{ form_start(form, {'action': path('add_user_job', {'user': user.id})}) }}
+                    <div class="modal-body">
+                        {{ form_row(form.position) }}
+                        {{ form_row(form.company) }}
+                        {{ form_row(form.link) }}
+                        {{ form_row(form.jobdescription) }}
+                        {{ form_widget(form.rate, { 'attr': {'class': 'hidden-row'} }) }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                        {{ form_row(form.submit) }}
+                    </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="editjob-modal" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="custom-modal">
+                        <div class="circle-icon-line-holder">
+                            <div class="circle-icon-line-modal">
+                                <div class="circle-icon-line">
+                                    <span class="title-circle"></span>
+                                    <svg class="title-icon">
+                                        <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#add-job') }}"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <h3 class="title">Edit Job</h3>
+                        <div class="form-holder">
+                            <div class="editjob-first-save-item">
+                                <input type="hidden" id="editjob-id" name="editjob-id">
+                                <p class="form-group">
+                                    <label class="form-group-content">
+                                        <input class="form-control-border-light" name="editjob-title" id="editjob-title" placeholder="Add the title of this position" type="text">
+                                    </label>
+                                </p>
+                                <p class="form-group">
+                                    <label class="form-group-content">
+                                        <input class="form-control-border-light" name="editjob-company"  id="editjob-company" placeholder="Add the name of the company" type="text">
+                                    </label>
+                                </p>
+                                <p class="form-group">
+                                    <label class="form-group-content">
+                                        <input class="form-control-border-light" name="editjob-link" id="editjob-link" placeholder="Add link of the original job posting" type="text">
+                                    </label>
+                                </p>
+                                <button class="btn btn-md btn-center btn-border-anim" id="save_edit_job_btn">Save</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="close close-modal-icon close-editjob-modal-btn">
+                                <svg width="23" height="23" style="pointer-events: none">
+                                    <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#close') }}"></use>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="contact-view-modal" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="custom-modal">
+                        <div class="circle-icon-line-holder">
+                            <div class="circle-icon-line-modal">
+                                <div class="circle-icon-line">
+                                    <span class="title-circle"></span>
+                                    <svg class="title-icon">
+                                        <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#add-job') }}"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="contact-view-title header-top">Contacts</p>
+                        <p class="contact-view-title header-position">Position Title</p>
+                        <p class="contact-view-title header-company-name">Company Name</p>
+                        <div class="add-btn-wrapper">
+                            <button id="contact-add">+</button>
+                        </div>
+                        <div class="contact-listing-items">
+                            <table class="contact-listing-table">
+                                <thead>
+                                <tr>
+                                    <th width="180">Name</th>
+                                    <th>Title</th>
+                                    <th width="135">Status</th>
+                                    <th width="70"></th>
+                                </tr>
+                                </thead>
+                                <tbody id="sortable"></tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-md btn-center btn-border-anim contact-list-btn-margin" id="save_contacts" type="submit">Save</button>
+                        <div>
+                        <span class="close close-modal-icon close-contact-view-modal-btn">
+                            <svg width="23" height="23" style="pointer-events: none;">
+                                <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#close') }}"></use>
+                            </svg>
+                        </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="contact-modal" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="custom-modal">
+                        <div class="circle-icon-line-holder">
+                            <div class="circle-icon-line-modal">
+                                <div class="circle-icon-line">
+                                    <span class="title-circle"></span>
+                                    <svg class="title-icon">
+                                        <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#add-job') }}"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <h3 class="title">Add Contact</h3>
+                        <form class="form-holder">
+                            <div class="text-center">
+                                <p class="form-group">
+                                    <label class="form-group-content">
+                                        <input class="form-control-border-light" name="contact-name" id="contact-name" placeholder="Add contact Name" type="text">
+                                    </label>
+                                </p>
+                                <p class="form-group">
+                                    <label class="form-group-content">
+                                        <input class="form-control-border-light" name="contact-title"  id="contact-title" placeholder="Add contact title" type="text">
+                                    </label>
+                                </p>
+                                <p class="form-group">
+                                    <label class="form-group-content">
+                                        <input class="form-control-border-light" name="contact-url" id="contact-url" placeholder="Add contact LinkedIn URL" type="text">
+                                    </label>
+                                </p>
+                                <p class="form-group">
+                                    <label class="form-group-content">
+                                        <textarea class="form-control-border-light" name="contact-note" id="contact-note" placeholder="Add Notes"></textarea>
+                                    </label>
+                                </p>
+                                <select class="form-control change-job-status" id="contact-status">
+                                    <option value="Messaged(1)" selected>Messaged(1)</option>
+                                    <option value="Messaged(2)">Messaged(2)</option>
+                                    <option value="Messaged(3)">Messaged(3)</option>
+                                    <option value="Reviewing">Reviewing</option>
+                                    <option value="Referred">Referred</option>
+                                    <option value="Forwarded">Forwarded</option>
+                                    <option value="Interested">Interested</option>
+                                    <option value="No Help">No Help</option>
+                                    <option value="Rejected">Rejected</option>
+                                    <option value="Unresponsive">Unresponsive</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-md btn-center btn-border-anim" id="add_contact_btn" type="submit">Save</button>
+                        </form>
+                        <div>
+                            <span class="close close-modal-icon close-contact-modal-btn">
+                                <svg width="23" height="23" style="pointer-events: none">
+                                    <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#close') }}"></use>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="contact-attempts-modal" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="custom-modal">
+                        <div class="circle-icon-line-holder">
+                            <div class="circle-icon-line-modal">
+                                <div class="circle-icon-line">
+                                    <span class="title-circle"></span>
+                                    <svg class="title-icon">
+                                        <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#add-job') }}"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="contact-view-title header-top">Contact Attempts</p>
+                        <p class="contact-view-title header-position">Position Title</p>
+                        <p class="contact-view-title header-company-name">Company Name</p>
+                        <div class="add-btn-wrapper">
+                            <button id="contact-attempt-add">+</button>
+                        </div>
+                        <div class="contact-listing-items">
+                            <table class="contact-listing-table">
+                                <thead>
+                                    <tr>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th style="width: 50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="contact-attempt-list"></tbody>
+                            </table>
+                        </div>
+
+                        <div>
+                            <span class="close close-modal-icon close-contact-attempts-modal-btn">
+                                <svg  width="23" height="23" style="pointer-events: none">
+                                    <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#close') }}"></use>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="contact-attempt-modal" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="custom-modal">
+                        <div class="circle-icon-line-holder">
+                            <div class="circle-icon-line-modal">
+                                <div class="circle-icon-line">
+                                    <span class="title-circle"></span>
+                                    <svg class="title-icon">
+                                        <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#add-job') }}"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="contact-view-title header-top">Add Attempt</p>
+                        <p class="contact-view-title header-position">Contact Name</p>
+                        <p class="contact-view-title header-company-name">Contact Title</p>
+
+                        <form class="form-holder">
+                            <div class="text-center">
+                                <p class="form-group">
+                                    <label class="form-group-content">
+                                        <textarea class="form-control-border-light" name="contact-attempt-note" id="contact-attempt-note" placeholder="Add Notes"></textarea>
+                                    </label>
+                                </p>
+                                <select class="form-control change-job-status" id="contact-attempt-status">
+                                    <option value="Messaged(1)" selected>Messaged(1)</option>
+                                    <option value="Messaged(2)">Messaged(2)</option>
+                                    <option value="Messaged(3)">Messaged(3)</option>
+                                    <option value="Reviewing">Reviewing</option>
+                                    <option value="Referred">Referred</option>
+                                    <option value="Forwarded">Forwarded</option>
+                                    <option value="Interested">Interested</option>
+                                    <option value="No Help">No Help</option>
+                                    <option value="Rejected">Rejected</option>
+                                    <option value="Unresponsive">Unresponsive</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-md btn-center btn-border-anim" id="add_contact_attempt_btn" type="submit">Save</button>
+                        </form>
+
+                        <div>
+                            <span class="close close-modal-icon close-contact-attempt-modal-btn">
+                                <svg width="23" height="23" style="pointer-events: none">
+                                    <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#close') }}"></use>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="job-note-modal" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="custom-modal">
+                        <div class="circle-icon-line-holder">
+                            <div class="circle-icon-line-modal">
+                                <div class="circle-icon-line">
+                                    <span class="title-circle"></span>
+                                    <svg class="title-icon">
+                                        <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#add-job') }}"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="contact-view-title header-top">Job Notes</p>
+                        <form class="form-holder">
+                            <div class="text-center">
+                                <p class="form-group">
+                                    <label class="form-group-content">
+                                        <textarea class="form-control-border-light" name="job-note" id="job-note" placeholder="Add Notes"></textarea>
+                                    </label>
+                                </p>
+                            </div>
+                            <button class="btn btn-md btn-center btn-border-anim" id="update_job_note_btn" type="submit">Save</button>
+                        </form>
+
+                        <div>
+                            <span class="close close-modal-icon close-job-note-modal-btn">
+                                <svg width="23" height="23" style="pointer-events: none;">
+                                    <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#close') }}"></use>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="note-modal" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="custom-modal">
+                        <div class="circle-icon-line-holder">
+                            <div class="circle-icon-line-modal">
+                                <div class="circle-icon-line">
+                                    <span class="title-circle"></span>
+                                    <svg class="title-icon">
+                                        <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#add-job') }}"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="contact-view-title header-top">Attempt Notes</p>
+                        <form class="form-holder">
+                            <div class="text-center">
+                                <p class="form-group">
+                                    <label class="form-group-content">
+                                        <textarea class="form-control-border-light" name="attempt-note" id="attempt-note" placeholder="Add Notes"></textarea>
+                                    </label>
+                                </p>
+                            </div>
+                            <button class="btn btn-md btn-center btn-border-anim" id="update_attempt_note_btn" type="submit">Save</button>
+                        </form>
+
+                        <div>
+                            <span class="close close-modal-icon close-attempt-note-modal-btn">
+                                <svg width="23" height="23" style="pointer-events: none;">
+                                    <use xlink:href="{{ asset('bundles/admin/css/sprite.svg#close') }}"></use>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('bundles/admin/plugins/CustomFileInputs/js/custom-file-input.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="{{ asset('bundles/admin/js/jobs.js') }}"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+
+        $("#sortable").sortable();
+        $("#sortable").disableSelection();
+
+        $(".edit-job-span").click(function(){
+            var job_id      = $(this).attr('contactuid');
+            var job_url     = $(this).attr('contacturl');
+            var job_company = $(this).attr('contactcompany');
+            var job_title   = $(this).attr('contacttitle');
+            var job_desc    = $(this).attr('contactnote');
+            $("#editjob-id").val( job_id );
+            $("#editjob-link").val( job_url );
+            $("#editjob-company").val( job_company );
+            $("#editjob-title").val( job_title );
+        });
+
+        $(".close-editjob-modal-btn").click(function () {
+            $("#editjob-modal").modal('hide');
+        });
+
+        $(".addjob_btn_set").click(function(){
+            $('.editjob-set-rate-items .editjob-select-rate').removeClass('editjob-select-rate');
+            $(this).addClass('editjob-select-rate');
+        });
+
+        $("#save_edit_job_btn").click(function(){
+            $.ajax({
+                url:  "{{ path('job_data_update') }}",
+                type: "POST",
+                data: {
+                    job_id      : $("#editjob-id").val() ,
+                    job_url     : $("#editjob-link").val() ,
+                    job_company : $("#editjob-company").val() ,
+                    job_title   : $("#editjob-title").val()
+                },
+                success:function(data) {
+                    location.reload();
+                }
+            });
+            $("#editjob-modal").modal('hide');
+        });
+
+        $(".show-contacts").click(function(){
+            var parent_ele  = $(this).closest(".post");
+            var job_title   = parent_ele.find(".username").text();
+            var job_comp    = parent_ele.find(".user-block").find(".description").text();
+            var job         = $(this).data('job');
+            $.ajax({
+                url : '{{ path('job_contact_get') }}',
+                type: 'POST',
+                data: {
+                    job: job
+                },
+                success: function (data) {
+                    var html = '';
+                    if(data.status == 'Ok'){
+                        var contacts = data.contacts;
+                        for(var i = 0; i < contacts.length; i++){
+                            var contact = contacts[i];
+                            html += htmlContactItem(contact.name, contact.title, contact.status, contact.link, contact.id);
+                        }
+                    }
+                    $("#sortable").html(html);
+                    $("#contact-view-modal").data('job', job);
+                    $("#contact-view-modal").find(".header-position").text(job_title);
+                    $("#contact-view-modal").find(".header-company-name").text(job_comp);
+                    $("#contact-view-modal").modal('show');
+                }
+            });
+        });
+
+        $(".close-contact-view-modal-btn").click(function () {
+            $("#sortable").html('');
+            $(this).closest(".modal").modal('hide');
+        });
+
+        $("#save_contacts").click(function () {
+            $("#contact-view-modal").modal('hide');
+            $("#sortable").html('');
+        });
+
+        $("#contact-add").click(function () {
+            $("#contact-view-modal").modal('hide');
+            $("#contact-modal").modal('show');
+        });
+
+        $(".close-contact-modal-btn").click(function () {
+            closeContactModal();
+        });
+
+        $("#add_contact_btn").click(function(e){
+            e.preventDefault();
+            var name    = $("#contact-name").val();
+            var title   = $("#contact-title").val();
+            var url     = $("#contact-url").val();
+            var note    = $("#contact-note").val();
+            var status  = $("#contact-status").val();
+
+            if(name == ''){
+                $("#contact-name").focus();
+                return;
+            }
+
+            if(title == ''){
+                $("#contact-title").focus();
+                return;
+            }
+
+            if(url == ''){
+                $("#contact-url").focus();
+                return;
+            }
+            var job = $("#contact-view-modal").data('job');
+            
+            $.ajax({
+                url : '{{ path('job_contact_add') }}',
+                type: 'POST',
+                data: {
+                    job     : job,
+                    name    : name,
+                    title   : title,
+                    link    : url,
+                    note    : note,
+                    status  : status
+                },
+                success: function (data) {
+                    if(data.status == 'Ok'){
+                        $("#sortable").append(htmlContactItem(name, title, status, url, data.id));
+                        closeContactModal();
+                    } else {
+                        alert('Cannot connect to server. Please try later');
+                    }
+                }
+            });
+        });
+
+        $("body").on('click', '.delete-contact', function() {
+            var element     = $(this);
+            var contact_id  = $(this).data('contact');
+            $.ajax({
+                url : '{{ path('job_contact_del') }}',
+                type: 'POST',
+                data: {
+                    contact: contact_id
+                },
+                success: function (data) {
+                    if(data.status == 'Ok'){
+                        element.closest('tr').remove();
+                    } else {
+                        alert('Cannot connect to server. Please try later');
+                    }
+                }
+            });
+        });
+
+        $("body").on('click', '.open-attempts', function() {
+            var contact = $(this).data('contact');
+            $.ajax({
+                url : '{{ path('contact_attempt_get') }}',
+                type: 'POST',
+                data: {
+                    contact: contact
+                },
+                success: function (data) {
+                    var html = '';
+                    if(data.status == 'Ok'){
+                        var attempts = data.attempts;
+                        for(var i = 0; i < attempts.length; i++){
+                            var attempt = attempts[i];
+                            html += htmlAttemptItem(attempt.id, attempt.status, attempt.date, attempt.note);
+                        }
+                    }
+                    $("#contact-attempt-list").html(html);
+                    $("#contact-attempts-modal").data('contact', contact);
+                    $("#contact-attempts-modal").modal('show');
+                    $("#contact-attempts-modal").find(".header-position").text(data.name);
+                    $("#contact-attempts-modal").find(".header-company-name").text(data.title);
+                    $("#contact-view-modal").modal('hide');
+                }
+            });
+        });
+
+        $(".close-contact-attempts-modal-btn").click(function () {
+            $("#contact-attempt-list").html('');
+            $("#contact-attempts-modal").modal('hide');
+            var job = $("#contact-view-modal").data('job');
+            $.ajax({
+                url : '{{ path('job_contact_get') }}',
+                type: 'POST',
+                data: {
+                    job: job
+                },
+                success: function (data) {
+                    var html = '';
+                    if(data.status == 'Ok'){
+                        var contacts = data.contacts;
+                        for(var i = 0; i < contacts.length; i++){
+                            var contact = contacts[i];
+                            html += htmlContactItem(contact.name, contact.title, contact.status, contact.link, contact.id);
+                        }
+                    }
+                    $("#sortable").html(html);
+                    $("#contact-view-modal").data('job', job);
+                    $("#contact-view-modal").modal('show');
+                }
+            });
+        });
+
+        $("#contact-attempt-add").click(function () {
+            var name    = $("#contact-attempts-modal").find(".header-position").text();
+            var title   = $("#contact-attempts-modal").find(".header-company-name").text();
+            $("#contact-attempt-modal").find(".header-position").text(name);
+            $("#contact-attempt-modal").find(".header-company-name").text(title);
+            $("#contact-attempts-modal").modal('hide');
+            $("#contact-attempt-modal").modal('show');
+        });
+
+        $(".close-contact-attempt-modal-btn").click(function () {
+            closeAttemptModal();
+        });
+
+        $("#add_contact_attempt_btn").click(function(e) {
+            e.preventDefault();
+            var note    = $("#contact-attempt-note").val();
+            var status  = $("#contact-attempt-status").val();
+            var contact = $("#contact-attempts-modal").data('contact');
+
+            $.ajax({
+                url : '{{ path('contact_attempt_add') }}',
+                type: 'POST',
+                data: {
+                    contact : contact,
+                    note    : note,
+                    status  : status
+                },
+                success: function (data) {
+                    if(data.status == 'Ok'){
+                        $("#contact-attempt-list").prepend(htmlAttemptItem(data.id, status, data.date, note));
+                        closeAttemptModal();
+                    } else {
+                        alert('Cannot connect to server. Please try later');
+                    }
+                }
+            });
+        });
+
+        $("body").on('change', '.change-contact-status', function(){
+            var contact = $(this).data('contact');
+            var status  = $(this).val();
+            $.ajax({
+                url : '{{ path('contact_change_status') }}',
+                type: 'POST',
+                data: {
+                    contact : contact,
+                    status  : status
+                },
+                success: function (data) {
+                    if(data.status != 'Ok'){
+                        alert('Cannot connect to server. Please try later.');
+                    }
+                }
+            });
+        });
+
+        $("body").on('click', '.job-notes', function(){
+            var job_id = $(this).data('job');
+            $.ajax({
+                url : '{{ path('job_note_get') }}',
+                type: 'POST',
+                data: {
+                    job_id: job_id
+                },
+                success: function(data){
+                    var note = '';
+                    if(data.status == 'Ok'){
+                        note = data.note;
+                    }
+                    $("#job-note").val(note);
+                    $("#job-note-modal").data('job', job_id);
+                    $("#job-note-modal").modal('show');
+                }
+            });
+        });
+
+        $(".close-job-note-modal-btn").click(function(){
+            $("#job-note-modal").modal('hide');
+        });
+
+        $("#update_job_note_btn").click(function(e){
+            e.preventDefault();
+            var job_id  = $("#job-note-modal").data('job');
+            var note    = $("#job-note").val();
+            $.ajax({
+                url : '{{ path('job_note_save') }}',
+                type: 'POST',
+                data: {
+                    job_id  : job_id,
+                    note    : note
+                },
+                success: function(data){
+                    $(".job-notes").each(function () {
+                        if($(this).data('job') == job_id){
+                            var html = 'Notes';
+                            if(note != ''){
+                                html += ' !!!';
+                            }
+                            $(this).html(html);
+                        }
+                    });
+                    $("#job-note-modal").modal('hide');
+                }
+            });
+        });
+
+        $("body").on('click', '.attempt-status-tab', function() {
+            var attempt_id = $(this).data('attempt');
+            $.ajax({
+                url : '{{ path('attempt_note_get') }}',
+                type: 'POST',
+                data: {
+                    attempt_id: attempt_id
+                },
+                success: function(data){
+                    var note = '';
+                    if(data.status == 'Ok'){
+                        note = data.note;
+                    }
+                    $("#attempt-note").val(note);
+                    $("#note-modal").data('attempt', attempt_id);
+                    $("#note-modal").modal('show');
+                    $("#contact-attempts-modal").modal('hide');
+                }
+            });
+        });
+
+        $("#update_attempt_note_btn").click(function(e){
+            e.preventDefault();
+            var attempt_id  = $("#note-modal").data('attempt');
+            var note        = $("#attempt-note").val();
+            $.ajax({
+                url : '{{ path('attempt_note_save') }}',
+                type: 'POST',
+                data: {
+                    attempt_id  : attempt_id,
+                    note        : note
+                },
+                success: function(data){
+                    $("#contact-attempts-modal").modal('show');
+                    $("#note-modal").modal('hide');
+                }
+            });
+        });
+
+        $(".close-attempt-note-modal-btn").click(function () {
+            $("#contact-attempts-modal").modal('show');
+            $("#note-modal").modal('hide');
+        });
+
+        $("body").on('click', '.delete-attempt', function() {
+            var element     = $(this);
+            var attempt_id  = $(this).data('attempt');
+            $.ajax({
+                url : '{{ path('contact_attempt_del') }}',
+                type: 'POST',
+                data: {
+                    attempt: attempt_id
+                },
+                success: function (data) {
+                    if(data.status == 'Ok'){
+                        element.closest('tr').remove();
+                    } else {
+                        alert('Cannot connect to server. Please try later');
+                    }
+                }
+            });
+        });
+
+        function htmlContactItem(name, title, status, link, id){
+            var new_contact = '<tr class="ui-state-default">';
+            new_contact += '<td style="cursor: move;"><a href="' + link + '">' + name + '</a></td>';
+            new_contact += '<td style="cursor: move;">' + title + '</td>';
+            new_contact += '<td style="cursor: move; color: #000000 !important;">';
+            new_contact += '<select class="form-control change-contact-status" data-contact="' + id +'">';
+            var statuses = ["Messaged(1)","Messaged(2)","Messaged(3)","Reviewing","Referred","Forwarded","Interested","No Help","Rejected","Unresponsive"];
+            for(var i = 0; i < statuses.length; i++){
+                new_contact += '<option value="' + statuses[i] + '"';
+                if(status == statuses[i]){
+                    new_contact += ' selected';
+                }
+                new_contact += '>' + statuses[i] + '</option>';
+            }
+            new_contact += '</select>';
+            new_contact += '</td>';
+            new_contact += '<td style="width: 70px;">';
+            new_contact += '<span class="open-attempts" data-contact="' + id + '">';
+            new_contact += '<svg><use xlink:href="{{ asset('bundles/admin/css/sprite.svg#edit') }}"></use></svg>';
+            new_contact += '</span>';
+            new_contact += '<span class="delete-contact" data-contact="' + id + '"><i class="fa fa-times" aria-hidden="true"></i></span>';
+            new_contact += '</td>';
+            new_contact += '</tr>';
+            return new_contact;
+        }
+
+        function closeContactModal(){
+            $("#contact-name").val('');
+            $("#contact-title").val('');
+            $("#contact-url").val('');
+            $("#contact-note").val('');
+            $("#contact-status").val('Messaged(1)');
+            $("#contact-modal").modal('hide');
+            $("#contact-view-modal").modal('show');
+        }
+
+        function htmlAttemptItem(id, status, date, note) {
+            var new_attempt = '<tr class="ui-state-default">';
+            new_attempt += '<td class="attempt-status-tab" data-attempt="' + id + '">' + status + '</td>';
+            new_attempt += '<td>' + dateFormat(date.date, "mm/dd/yyyy") + '</td>';
+            new_attempt += '<td style="width: 50px;">';
+            new_attempt += '<span class="delete-attempt" data-attempt="' + id + '"><i class="fa fa-times" aria-hidden="true"></i></span>';
+            new_attempt += '</td>';
+            new_attempt += '</tr>';
+            return new_attempt;
+        }
+
+        function closeAttemptModal(){
+            $("#contact-attempt-note").val('');
+            $("#contact-attempt-status").val('Messaged(1)');
+            $("#contact-attempts-modal").modal('show');
+            $("#contact-attempt-modal").modal('hide');
+        }
+
+        var dateFormat = function () {
+            var token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
+                timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
+                timezoneClip = /[^-+\dA-Z]/g,
+                pad = function (val, len) {
+                    val = String(val);
+                    len = len || 2;
+                    while (val.length < len) val = "0" + val;
+                    return val;
+                };
+
+            // Regexes and supporting functions are cached through closure
+            return function (date, mask, utc) {
+                var dF = dateFormat;
+
+                // You can't provide utc if you skip other args (use the "UTC:" mask prefix)
+                if (arguments.length == 1 && Object.prototype.toString.call(date) == "[object String]" && !/\d/.test(date)) {
+                    mask = date;
+                    date = undefined;
+                }
+
+                // Passing date through Date applies Date.parse, if necessary
+                date = date ? new Date(date) : new Date;
+                if (isNaN(date)) throw SyntaxError("invalid date");
+
+                mask = String(dF.masks[mask] || mask || dF.masks["default"]);
+
+                // Allow setting the utc argument via the mask
+                if (mask.slice(0, 4) == "UTC:") {
+                    mask = mask.slice(4);
+                    utc = true;
+                }
+
+                var _ = utc ? "getUTC" : "get",
+                    d = date[_ + "Date"](),
+                    D = date[_ + "Day"](),
+                    m = date[_ + "Month"](),
+                    y = date[_ + "FullYear"](),
+                    H = date[_ + "Hours"](),
+                    M = date[_ + "Minutes"](),
+                    s = date[_ + "Seconds"](),
+                    L = date[_ + "Milliseconds"](),
+                    o = utc ? 0 : date.getTimezoneOffset(),
+                    flags = {
+                        d:    d,
+                        dd:   pad(d),
+                        ddd:  dF.i18n.dayNames[D],
+                        dddd: dF.i18n.dayNames[D + 7],
+                        m:    m + 1,
+                        mm:   pad(m + 1),
+                        mmm:  dF.i18n.monthNames[m],
+                        mmmm: dF.i18n.monthNames[m + 12],
+                        yy:   String(y).slice(2),
+                        yyyy: y,
+                        h:    H % 12 || 12,
+                        hh:   pad(H % 12 || 12),
+                        H:    H,
+                        HH:   pad(H),
+                        M:    M,
+                        MM:   pad(M),
+                        s:    s,
+                        ss:   pad(s),
+                        l:    pad(L, 3),
+                        L:    pad(L > 99 ? Math.round(L / 10) : L),
+                        t:    H < 12 ? "a"  : "p",
+                        tt:   H < 12 ? "am" : "pm",
+                        T:    H < 12 ? "A"  : "P",
+                        TT:   H < 12 ? "AM" : "PM",
+                        Z:    utc ? "UTC" : (String(date).match(timezone) || [""]).pop().replace(timezoneClip, ""),
+                        o:    (o > 0 ? "-" : "+") + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
+                        S:    ["th", "st", "nd", "rd"][d % 10 > 3 ? 0 : (d % 100 - d % 10 != 10) * d % 10]
+                    };
+
+                return mask.replace(token, function ($0) {
+                    return $0 in flags ? flags[$0] : $0.slice(1, $0.length - 1);
+                });
+            };
+        }();
+
+        // Some common format strings
+        dateFormat.masks = {
+            "default":      "ddd mmm dd yyyy HH:MM:ss",
+            shortDate:      "m/d/yy",
+            mediumDate:     "mmm d, yyyy",
+            longDate:       "mmmm d, yyyy",
+            fullDate:       "dddd, mmmm d, yyyy",
+            shortTime:      "h:MM TT",
+            mediumTime:     "h:MM:ss TT",
+            longTime:       "h:MM:ss TT Z",
+            isoDate:        "yyyy-mm-dd",
+            isoTime:        "HH:MM:ss",
+            isoDateTime:    "yyyy-mm-dd'T'HH:MM:ss",
+            isoUtcDateTime: "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+        };
+
+        // Internationalization strings
+        dateFormat.i18n = {
+            dayNames: [
+                "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",
+                "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+            ],
+            monthNames: [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+                "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
+            ]
+        };
+
+        // For convenience...
+        Date.prototype.format = function (mask, utc) {
+            return dateFormat(this, mask, utc);
+        };
+
+    </script>
+{% endblock %}

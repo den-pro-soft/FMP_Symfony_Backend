@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Quotes{% endblock %}
+{% block sub_small_title %}List of all quotes{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-file"></i> Quotes</li>
+{% endblock %}
+
+{% block content %}
+    <div class="col-xs-4">
+        <a href="{{ path('add_quotes') }}" class="btn btn-success"><i class="fa fa-plus"></i></a>
+    </div>
+    <div class="row custom-content">
+        <div class="col-md-12">
+        <div class="box">
+        <div class="box-body">
+            <table id="example1" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Number</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for quot in quotes %}
+                    <tr>
+                        <td> {{ quot.no }} </td>
+                        <td><a href="{{ path('edit_quotes', {'quotes': quot.id}) }}">{{ quot.title }}</a></td>
+                        <td>
+                            {% autoescape %}
+                                {{ quot.content|raw }}
+                            {% endautoescape %}
+                        </td>
+                        <td class="text-center">
+                            <a class="btn btn-danger btn-sm" href="{{path('delete_quotes', {'quotes': quot.id})}}"><i class="fa fa-trash"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+{% endblock %}

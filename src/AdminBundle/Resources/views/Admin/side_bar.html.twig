@@ -1,0 +1,75 @@
+<ul class="sidebar-menu">
+    <li class="header">MAIN NAVIGATION</li>
+    {% if is_granted('ROLE_ADMIN_MANAGER') %}
+    <li>
+        <a href="{{ path('dashboard') }}">
+            <i class="fa fa-user-secret"></i> <span>Admin management</span>
+        </a>
+    </li>
+    {% endif %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <li>
+            <a href="{{ path('list_tasks', {'user': app.user.id, 'filter': 'active'}) }}">
+                <i class="fa fa-file-text"></i><span>Tasks</span>
+            </a>
+        </li>
+    {% endif %}
+    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_SDR') %}
+    <li>
+        <a href="{{path('list_users_filter', {'filter': "active"})}}">
+            <i class="fa fa-users"></i> <span>Users</span>
+        </a>
+    </li>
+    {% endif %}
+    {% if is_granted('ROLE_ADMIN_MANAGER') %}
+    <li>
+        <a href="{{ path('view_list_pages') }}">
+            <i class="fa fa-file-text"></i> <span>Pages</span>
+        </a>
+    </li>
+    {% endif %}
+    {% if is_granted('ROLE_MANAGER_BLOG') %}
+    <li>
+        <a href="{{ path('view_list_blog') }}">
+            <i class="fa fa-file"></i> <span>Career advice</span>
+        </a>
+    </li>
+    {% endif %}
+    {% if is_granted('ROLE_ADMIN_MANAGER') %}
+    <li>
+        <a href="{{ path('view_list_services') }}">
+            <i class="fa fa-search-plus"></i> <span>Services</span>
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('view_discounts') }}">
+            <i class="fa fa-credit-card"></i> <span>Discounts</span>
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('list_testimonials') }}">
+            <i class="fa fa-users"></i> <span>Testimonials</span>
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('list_templates') }}">
+            <i class="fa fa-file-text"></i> <span>Documents</span>
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('list_resources') }}">
+            <i class="fa fa-file-text"></i> <span>Resources</span>
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('view_list_quotes') }}">
+            <i class="fa fa-file-text"></i> <span>Quotes</span>
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('chat_settings') }}">
+            <i class="fa fa-commenting"></i> <span>Chat settings</span>
+        </a>
+    </li>
+    {% endif %}
+</ul>

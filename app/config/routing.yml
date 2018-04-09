@@ -1,0 +1,17 @@
+rest:
+    resource: "@RestBundle/Controller/"
+    type:     annotation
+    prefix:   /api/v1
+
+admin:
+    resource: "@AdminBundle/Controller/"
+    type:     annotation
+
+logout:
+    path:     /admin/logout
+
+reset-password:
+    path:     /password-reset
+
+message_notification:
+    path:     /home

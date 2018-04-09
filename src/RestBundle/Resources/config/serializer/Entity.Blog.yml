@@ -1,0 +1,54 @@
+RestBundle\Entity\Blog:
+    exclusion_policy: ALL
+    properties:
+        id:
+            expose: true
+            groups: ['list', 'details', 'page', 'random_blog', 'top']
+
+        title:
+            expose: true
+            groups: ['list', 'details', 'page', 'random_blog', 'top']
+
+        seo_title:
+            expose: true
+            groups: ['details', 'page']
+
+        description:
+            expose: true
+            groups: ['list', 'details', 'page', 'random_blog']
+
+        content:
+            expose: true
+            groups: ['details']
+
+        image:
+            expose: true
+            groups: ['list', 'details', 'page', 'random_blog', 'top']
+
+        image_alt:
+            expose: true
+            groups: ['list', 'details', 'page', 'random_blog', 'top']
+
+        post_date:
+            expose: true
+            groups: ['list', 'details']
+
+        url:
+            expose: true
+            groups: ['list', 'details', 'random_blog', 'top', 'slugs']
+
+        author:
+            expose: true
+            groups: ['list', 'details', 'random_blog']
+
+        tops:
+            expose: true
+            groups: ['details']
+
+        random_blogs:
+            expose: true
+            groups: ['details']
+
+        liked:
+            expose: true
+            groups: ['list', 'details', 'top']
